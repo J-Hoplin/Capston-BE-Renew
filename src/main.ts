@@ -12,6 +12,8 @@ async function bootstrap() {
 
   // Global prefix. All API endpoints start with 'v1'
   app.setGlobalPrefix('v1');
+
+  // Add Swagger Document
   SwaggerModule.setup('docs', app, swaggerGenerator(app));
   await app.listen(3000);
 }

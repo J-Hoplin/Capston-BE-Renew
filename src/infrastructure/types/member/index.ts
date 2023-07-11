@@ -1,10 +1,17 @@
 export enum Sex {
-  MALE = 'MALE',
-  FEMALE = 'FEMALE',
+  MALE = 'male',
+  FEMALE = 'female',
 }
 
 export enum Role {
-  STUDENT = 'STUDENT',
-  INSTRUCTOR = 'INSTRUCTOR',
-  MANAGER = 'MANAGER',
+  STUDENT = 'student',
+  INSTRUCTOR = 'instructor',
+  MANAGER = 'manager',
+}
+
+export enum Approve {
+  PENDING = 'pending',
+  APPROVE = 'approve',
+  REJECT = 'reject',
+  RESTRICT = 'restrict',
 }
