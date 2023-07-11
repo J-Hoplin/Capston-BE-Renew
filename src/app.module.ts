@@ -2,6 +2,8 @@ import { Logger, Module } from '@nestjs/common';
 import { AppController } from '@app/app.controller';
 import { AppService } from '@app/app.service';
 import { LoggerModule } from '@hoplin/nestjs-logger';
+import { ConfigModule } from '@nestjs/config';
+import { configOptions } from './options/config.option';
 
 @Module({
   imports: [
@@ -14,6 +16,7 @@ import { LoggerModule } from '@hoplin/nestjs-logger';
         timestamp: true,
       },
     }),
+    ConfigModule.forRoot(configOptions),
   ],
   controllers: [AppController],
   providers: [AppService],

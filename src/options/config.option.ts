@@ -1,4 +1,5 @@
 import { ConfigModuleOptions } from '@nestjs/config';
+import databaseConfig from '@src/config/config/database.config';
 import { envValidator } from '@src/config/validator/env.validator';
 import * as dotenv from 'dotenv';
 
@@ -12,10 +13,10 @@ export const configOptions: ConfigModuleOptions = {
     `${__dirname}/../config/env/${process.env.API_MODE || 'dev'}.env`,
   ],
   cache: true,
-  load: [],
-  validationSchema: envValidator,
-  validationOptions: {
-    abortEarly: true,
-    allowUnknown: true,
-  },
+  load: [databaseConfig],
+  // validationSchema: envValidator,
+  // validationOptions: {
+  //   abortEarly: true,
+  //   allowUnknown: true,
+  // },
 };

@@ -1,4 +1,4 @@
-export type SwaggerTag = {
-  tag: string;
-  description: string;
-};
+import * as common from './common';
+import * as member from './member';
+
+export { common, member };

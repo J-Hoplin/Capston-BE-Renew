@@ -1,7 +1,7 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { swaggerTags } from '@infrastructure/swagger/swagger.tag';
 import { INestApplication } from '@nestjs/common';
-import { SwaggerTag } from '../types';
+import { common } from '@infrastructure/types';
 
 const documentConfig = new DocumentBuilder()
   .setTitle('API Document : Cloud education environment')
@@ -10,7 +10,7 @@ const documentConfig = new DocumentBuilder()
   .setContact('hoplin', 'https://github.com/J-hoplin1', 'jhoplin7259@gmail.com')
   .addBearerAuth();
 
-swaggerTags.forEach(({ tag, description }: SwaggerTag) => {
+swaggerTags.forEach(({ tag, description }: common.SwaggerTag) => {
   documentConfig.addTag(tag, description);
 });
 
