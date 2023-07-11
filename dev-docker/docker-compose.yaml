@@ -1,0 +1,40 @@
+version: '3.7'
+services:
+  api:
+    build: .
+    image: "capston-design-be-dev"
+    ports:
+      - "3000:3000"
+    restart: "unless-stopped"
+    depends_on:
+      - db
+      - mongo
+    networks:
+      - api-network
+    volumes:
+      - ..:/api
+  db:
+    image: mysql
+    ports:
+      - "3306:3306"
+    restart: "unless-stopped"
+    environment:
+      - MYSQL_ROOT_PASSWORD=hoplin1234!
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_DATABASE=cloudedu
+    networks:
+      - api-network
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    restart: "unless-stopped"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password1234!
+      - MONGO_INITDB_DATABASE=cloud-edu
+    networks:
+      - api-network
+networks:
+  api-network:
+    driver: bridge
