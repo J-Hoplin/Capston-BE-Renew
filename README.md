@@ -31,6 +31,7 @@ Cloud Education Backend Member Management API
 - TypeScript
 - Nest.js
 - MySQL
+  - ORM : TypeORM
 - MongoDB
 - Docker, Docker-Compose
 
