@@ -6,6 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { configOptions } from './options/config.option';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './options/typeorm.option';
+import { HealthModule } from './app/health/health.module';
+import { MemberModule } from './app/member/member.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { typeORMConfig } from './options/typeorm.option';
     }),
     ConfigModule.forRoot(configOptions),
     TypeOrmModule.forRootAsync(typeORMConfig),
+    HealthModule,
+    MemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -5,24 +5,31 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { member } from '@infrastructure/types';
 import { DepartmentEntity } from '@domain/department/department.entity';
 import { CommonEntity } from '../common.abstract';
+import { StudentEntity } from '@domain/student/student.entity';
+import { InstructorEntity } from '@domain/instructor/instructor.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
-export abstract class MemberEntity extends CommonEntity {
+@Entity('Member')
+export class MemberEntity extends CommonEntity {
   @Column({
     type: 'datetime',
     nullable: false,
   })
+  @ApiProperty()
   password: string;
 
   @Column({
     type: String,
     nullable: false,
   })
+  @ApiProperty()
   email: string;
 
   @Column({
@@ -30,6 +37,7 @@ export abstract class MemberEntity extends CommonEntity {
     enum: member.Sex,
     nullable: false,
   })
+  @ApiProperty()
   sex: member.Sex;
 
   /**
@@ -40,21 +48,54 @@ export abstract class MemberEntity extends CommonEntity {
     enum: member.Approve,
     nullable: false,
   })
+  @ApiProperty()
+  approved: member.Approve;
+
   @Column({
     type: 'datetime',
     nullable: false,
   })
+  @ApiProperty()
   birth: Date;
 
   @Column({
     type: String,
     nullable: true,
   })
+  @ApiProperty()
   profileImgURL: string;
 
+  @Column({
+    type: 'enum',
+    enum: member.Role,
+    nullable: false,
+  })
+  @ApiProperty()
+  memberRole: member.Role;
+
   @CreateDateColumn()
+  @ApiProperty()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @ApiProperty()
   updatedAt: Date;
+
+  @OneToOne(() => StudentEntity, {
+    cascade: true,
+  })
+  @JoinColumn({
+    name: 'student_profile',
+  })
+  @ApiProperty()
+  studentProfile: StudentEntity;
+
+  @OneToOne(() => InstructorEntity, {
+    cascade: true,
+  })
+  @JoinColumn({
+    name: 'instructor_profile',
+  })
+  @ApiProperty()
+  instructorProfile: InstructorEntity;
 }
