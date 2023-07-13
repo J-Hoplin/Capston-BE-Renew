@@ -24,17 +24,10 @@ export class InstructorEntity {
   @Column({
     type: String,
     nullable: false,
+    unique: true,
   })
   @ApiProperty()
-  instructorNumber: string;
-
-  // Static Role Binding
-  @Column({
-    type: String,
-    default: member.Role.INSTRUCTOR,
-  })
-  @ApiProperty()
-  role: member.Role.INSTRUCTOR;
+  groupId: string;
 
   @ManyToOne(() => DepartmentEntity, (department) => department.instructors, {
     cascade: true,

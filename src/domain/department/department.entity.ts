@@ -18,7 +18,7 @@ export class DepartmentEntity extends CommonEntity {
     nullable: true,
   })
   @ApiProperty()
-  phonenumber: string;
+  phoneNumber: string;
 
   @Column({
     type: String,

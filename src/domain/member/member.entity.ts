@@ -19,7 +19,7 @@ import { ApiProperty } from '@nestjs/swagger';
 @Entity('Member')
 export class MemberEntity extends CommonEntity {
   @Column({
-    type: 'datetime',
+    type: String,
     nullable: false,
   })
   @ApiProperty()
@@ -28,9 +28,18 @@ export class MemberEntity extends CommonEntity {
   @Column({
     type: String,
     nullable: false,
+    unique: true,
   })
   @ApiProperty()
   email: string;
+
+  // 학번 혹은 교직원 번호
+  @Column({
+    type: String,
+    nullable: false,
+    unique: true,
+  })
+  groupId: string;
 
   @Column({
     type: 'enum',

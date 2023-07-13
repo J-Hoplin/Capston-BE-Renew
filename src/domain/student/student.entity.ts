@@ -6,11 +6,13 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { DepartmentEntity } from '@domain/department/department.entity';
 import { ClassEntity } from '@domain/class/class.entity';
 import { member } from '@src/infrastructure/types';
+import { ClassStudentEntity } from '@domain/class_student/class-student.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('student')
@@ -23,17 +25,10 @@ export class StudentEntity {
   @Column({
     type: String,
     nullable: false,
+    unique: true,
   })
   @ApiProperty()
-  studentNumber: string;
-
-  // Static Role Binding
-  @Column({
-    type: String,
-    default: member.Role.STUDENT,
-  })
-  @ApiProperty()
-  role: member.Role.STUDENT;
+  groupId: string;
 
   @ManyToOne(() => DepartmentEntity, (department) => department.students, {
     cascade: true,
@@ -44,10 +39,6 @@ export class StudentEntity {
   @ApiProperty()
   department: DepartmentEntity;
 
-  @ManyToMany(() => ClassEntity, {
-    cascade: true,
-  })
-  @JoinTable()
-  @ApiProperty()
-  classes: ClassEntity[];
+  @OneToMany(() => ClassStudentEntity, (cs) => cs.students)
+  classstudent: ClassStudentEntity[];
 }
