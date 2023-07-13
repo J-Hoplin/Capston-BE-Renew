@@ -55,4 +55,4 @@ docker-compose up -d
 
 ## ERD
 
-![img](./img/erd-transparent.png)
+![img](./img/ERD_black.png)
