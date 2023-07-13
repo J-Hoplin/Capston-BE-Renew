@@ -7,6 +7,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { DepartmentEntity } from '@domain/department/department.entity';
@@ -17,18 +18,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('student')
 export class StudentEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   @ApiProperty()
-  id: number;
-
-  // 학생 고유번호
-  @Column({
-    type: String,
-    nullable: false,
-    unique: true,
-  })
-  @ApiProperty()
-  groupId: string;
+  id: string;
 
   @ManyToOne(() => DepartmentEntity, (department) => department.students, {
     cascade: true,
@@ -37,8 +29,12 @@ export class StudentEntity {
     name: 'department_id',
   })
   @ApiProperty()
-  department: DepartmentEntity;
+  department: number;
 
   @OneToMany(() => ClassStudentEntity, (cs) => cs.students)
   classstudent: ClassStudentEntity[];
+
+  constructor(data: Partial<StudentEntity>) {
+    Object.assign(this, data);
+  }
 }

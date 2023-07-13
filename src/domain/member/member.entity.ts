@@ -46,7 +46,9 @@ export class MemberEntity extends CommonEntity {
     enum: member.Sex,
     nullable: false,
   })
-  @ApiProperty()
+  @ApiProperty({
+    enum: member.Sex,
+  })
   sex: member.Sex;
 
   /**
@@ -57,8 +59,17 @@ export class MemberEntity extends CommonEntity {
     enum: member.Approve,
     nullable: false,
   })
-  @ApiProperty()
+  @ApiProperty({
+    enum: member.Approve,
+  })
   approved: member.Approve;
+
+  @Column({
+    type: 'text',
+    nullable: false,
+  })
+  @ApiProperty()
+  approvedReason: string;
 
   @Column({
     type: 'datetime',
@@ -79,7 +90,9 @@ export class MemberEntity extends CommonEntity {
     enum: member.Role,
     nullable: false,
   })
-  @ApiProperty()
+  @ApiProperty({
+    enum: member.Role,
+  })
   memberRole: member.Role;
 
   @CreateDateColumn()
@@ -107,4 +120,9 @@ export class MemberEntity extends CommonEntity {
   })
   @ApiProperty()
   instructorProfile: InstructorEntity;
+
+  constructor(data: Partial<MemberEntity>) {
+    super();
+    Object.assign(this, data);
+  }
 }

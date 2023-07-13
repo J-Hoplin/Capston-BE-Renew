@@ -6,7 +6,9 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
+  Relation,
 } from 'typeorm';
 import { DepartmentEntity } from '@domain/department/department.entity';
 import { ClassImageEntiy } from '@domain/class-image/classimage.entity';
@@ -16,19 +18,15 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('instructor')
 export class InstructorEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn() // Should be member.groupId
   @ApiProperty()
-  id: number;
+  id: string;
 
-  // 교직원 고유번호
-  @Column({
-    type: String,
-    nullable: false,
-    unique: true,
-  })
-  @ApiProperty()
-  groupId: string;
-
+  /**
+   * Circular Dependency Issue
+   * https://github.com/typeorm/typeorm/issues/4526
+   *
+   */
   @ManyToOne(() => DepartmentEntity, (department) => department.instructors, {
     cascade: true,
   })
@@ -36,7 +34,7 @@ export class InstructorEntity {
     name: 'department_id',
   })
   @ApiProperty()
-  department: DepartmentEntity;
+  department: number;
 
   @OneToMany(() => ClassEntity, (cls) => cls.instructor)
   @ApiProperty()
@@ -45,4 +43,8 @@ export class InstructorEntity {
   @OneToMany(() => ClassImageEntiy, (ci) => ci.instructor)
   @ApiProperty()
   images: ClassImageEntiy[];
+
+  constructor(data: Partial<InstructorEntity>) {
+    Object.assign(this, data);
+  }
 }
