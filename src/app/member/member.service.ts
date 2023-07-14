@@ -31,11 +31,11 @@ export class MemberService {
     private readonly config: ConfigType<typeof defaultConfig>,
   ) {}
 
-  private async hashPassword(password: string): Promise<string> {
+  public async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, +this.config.hashCount);
   }
 
-  private async comparePassword(
+  public async comparePassword(
     password: string,
     hashedPassword: string,
   ): Promise<boolean> {
