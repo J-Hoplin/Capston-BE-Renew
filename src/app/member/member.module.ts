@@ -6,9 +6,13 @@ import { MemberController } from './member.controller';
 import { ConfigModule } from '@nestjs/config';
 import defaultConfig from '@src/config/config/default.config';
 import { DepartmentEntity } from '@src/domain/department/department.entity';
+import { LoggerModule } from '@hoplin/nestjs-logger';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([MemberEntity, DepartmentEntity])],
+  imports: [
+    LoggerModule.forFeature(),
+    TypeOrmModule.forFeature([MemberEntity, DepartmentEntity]),
+  ],
   providers: [MemberService],
   controllers: [MemberController],
 })

@@ -56,11 +56,11 @@ export class DepartmentEntity extends CommonEntity {
 
   @OneToMany(() => StudentEntity, (student) => student.department)
   @ApiProperty()
-  students: StudentEntity | StudentEntity[];
+  students: StudentEntity[];
 
   @OneToMany(() => InstructorEntity, (instructor) => instructor.department)
   @ApiProperty()
-  instructors: InstructorEntity | InstructorEntity[];
+  instructors: InstructorEntity[];
 
   constructor(data: Partial<DepartmentEntity>) {
     super();

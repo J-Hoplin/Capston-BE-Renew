@@ -30,6 +30,8 @@ import {
 } from '@nestjs/swagger';
 import { DEPARTMENT_EXCEPTION_MSG } from '@src/infrastructure/exceptions';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { CommonResponseDto } from '@src/infrastructure/common/common.response.dto';
+import { DeleteDepartmentDto } from './dto/delete-department.dto';
 
 @ApiTags('Department')
 @Controller('department')
@@ -138,5 +140,13 @@ export class DepartmentController {
   }
 
   @Delete('/')
-  public async deleteDepartment() {}
+  @ApiOperation({
+    summary: '학부를 삭제합니다',
+  })
+  @ApiOkResponse({ type: CommonResponseDto })
+  public async deleteDepartment(@Body() body: DeleteDepartmentDto) {
+    return new CommonResponseDto(
+      await this.departmentService.deleteDepartment(body),
+    );
+  }
 }

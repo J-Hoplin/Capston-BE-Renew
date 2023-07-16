@@ -129,7 +129,7 @@ export class MemberController {
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         }),
     )
-    profileImage: Express.Multer.File,
+    profileImage?: Express.Multer.File,
   ): Promise<MemberEntity> {
     return await this.memberService.createMember(body, profileImage);
   }
@@ -140,6 +140,12 @@ export class MemberController {
     description:
       '이름, 비밀번호, 생일 정보만 변경 가능합니다. 회원정보 변경을 위해서는 비밀번호 입력이 필수입니다.',
   })
+  @UseInterceptors(
+    FileInterceptor(
+      'profile',
+      imageLocalDiskOption(`${__dirname}/../../../profiles`),
+    ),
+  )
   @ApiOkResponse({ type: MemberEntity })
   @ApiBadRequestResponse({
     description: MEMBER_EXCEPTION_MSG.MemberNotFound,
@@ -149,8 +155,20 @@ export class MemberController {
   })
   public async updateMember(
     @Body() body: UpdateMemberDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: '.(jpg|png)$',
+        })
+        .addMaxSizeValidator({ maxSize: 1000000 })
+        .build({
+          fileIsRequired: false,
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file?: Express.Multer.File,
   ): Promise<MemberEntity> {
-    return await this.memberService.updateMember(body);
+    return await this.memberService.updateMember(body, file);
   }
 
   @Get('/approval/:id')

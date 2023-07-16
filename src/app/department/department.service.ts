@@ -6,8 +6,12 @@ import { CreateDepartmentDto } from './dto/create-department.dto';
 import {
   DepartmentNameAlreadyTaken,
   DepartmentNotFound,
+  MemberStillBelongsToDepartment,
 } from '@src/infrastructure/exceptions';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import * as fs from 'fs';
+import { Logger } from '@hoplin/nestjs-logger';
+import { DeleteDepartmentDto } from './dto/delete-department.dto';
 
 @Injectable()
 export class DepartmentService {
@@ -15,6 +19,7 @@ export class DepartmentService {
     @InjectRepository(DepartmentEntity)
     private readonly departmentRepository: Repository<DepartmentEntity>,
     private readonly dataSource: DataSource,
+    private readonly logger: Logger,
   ) {}
 
   public async getAllDepartments(detail: boolean): Promise<DepartmentEntity[]> {
@@ -63,7 +68,9 @@ export class DepartmentService {
           ? profile.destination
           : null;
 
-        return await departmentRepository.save(newDepartment);
+        const result = await departmentRepository.save(newDepartment);
+        this.logger.log(`Department created : ${newDepartment.name}`);
+        return result;
       },
     );
     return newDepartment;
@@ -108,6 +115,16 @@ export class DepartmentService {
           departmentProfileURL: originalProfileURL,
         } = targetDepartment;
 
+        // Change profile image url
+        if (profile) {
+          // Delte previous file
+          fs.unlink(originalProfileURL, (err) => {
+            if (err) {
+              this.logger.error(err);
+            }
+          });
+          targetDepartment.departmentProfileURL = profile.destination;
+        }
         // Update target department's information
         targetDepartment.name = body.name ? body.name : originalName;
         targetDepartment.phoneNumber = body.phoneNumber
@@ -117,11 +134,31 @@ export class DepartmentService {
         targetDepartment.departmentProfileURL = profile
           ? profile.destination
           : originalProfileURL;
-        return await departmentRepository.save(targetDepartment);
+        const reuslt = await departmentRepository.save(targetDepartment);
+        this.logger.log(`Department updated : ${targetDepartment.name}`);
+        return reuslt;
       },
     );
     return updatedDepartment;
   }
 
-  public async deleteDepartment() {}
+  public async deleteDepartment(body: DeleteDepartmentDto): Promise<boolean> {
+    // Find department exist
+    const findDepartment = await this.departmentRepository.findOneBy({
+      id: body.id,
+    });
+    if (!findDepartment) {
+      throw new DepartmentNotFound();
+    }
+    // All of the members should not belongs to department when you want to delete it.
+    if (findDepartment.students.length || findDepartment.instructors.length) {
+      throw new MemberStillBelongsToDepartment();
+    }
+    await this.dataSource.transaction(async (manager: EntityManager) => {
+      const departmentRepository = manager.getRepository(DepartmentEntity);
+      await departmentRepository.delete(findDepartment);
+      this.logger.log(`Department removed : ${findDepartment.name}`);
+    });
+    return true;
+  }
 }

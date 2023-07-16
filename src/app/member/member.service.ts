@@ -18,6 +18,8 @@ import { StudentEntity } from '@src/domain/student/student.entity';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { DeleteMemberDto } from './dto/delete-member.dto';
 import { UpdateMemberApprovalDto } from './dto/updateMemberApproval.dto';
+import * as fs from 'fs';
+import { Logger, LoggerModule } from '@hoplin/nestjs-logger';
 
 @Injectable()
 export class MemberService {
@@ -29,6 +31,7 @@ export class MemberService {
     private readonly dataSource: DataSource,
     @Inject(defaultConfig.KEY)
     private readonly config: ConfigType<typeof defaultConfig>,
+    private readonly logger: Logger,
   ) {}
 
   public async hashPassword(password: string): Promise<string> {
@@ -136,7 +139,10 @@ export class MemberService {
     return newMember;
   }
 
-  public async updateMember(body: UpdateMemberDto): Promise<MemberEntity> {
+  public async updateMember(
+    body: UpdateMemberDto,
+    file?: Express.Multer.File,
+  ): Promise<MemberEntity> {
     const findMember = await this.memberRepository.findOneBy({
       id: body.id,
     });
@@ -160,7 +166,23 @@ export class MemberService {
           ? await this.hashPassword(body.changedpassword)
           : findMember.password;
         findMember.birth = body.birth ? body.birth : findMember.birth;
-        return await memberRepository.save(findMember);
+
+        // Change profile image url
+        if (file) {
+          // Delete previous file
+          fs.unlink(findMember.profileImgURL, (err) => {
+            if (err) {
+              this.logger.error(err);
+            }
+          });
+          findMember.profileImgURL = file.destination;
+        }
+
+        const result = await memberRepository.save(findMember);
+        this.logger.log(
+          `Update member : ${findMember.name}(${findMember.groupId})`,
+        );
+        return result;
       },
     );
     return updatedMember;
@@ -186,11 +208,15 @@ export class MemberService {
     if (!findMember) {
       throw new MemberNotFound(`Member with ID ${body.id} not found`);
     }
+    const originalApproval = findMember.approved;
     findMember.approved = body.approved;
     findMember.approvedReason = body.approvedReason;
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const memberRepository = manager.getRepository(MemberEntity);
       await memberRepository.save(findMember);
+      this.logger.log(
+        `Update member's approval : ${findMember.name}(${findMember.groupId}), (${originalApproval} -> ${body.approved}, ${body.approvedReason})`,
+      );
     });
     return true;
   }
@@ -214,6 +240,9 @@ export class MemberService {
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const memberRepository = manager.getRepository(MemberEntity);
       await memberRepository.delete(findMember);
+      this.logger.log(
+        `Delete member : ${findMember.name}(${findMember.groupId})`,
+      );
     });
     return true;
   }

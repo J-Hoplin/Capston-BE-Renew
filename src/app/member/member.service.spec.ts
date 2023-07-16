@@ -16,12 +16,18 @@ import defaultConfig from '@src/config/config/default.config';
 import { DataSource } from 'typeorm';
 import { MemberNotFound } from '@src/infrastructure/exceptions';
 import { member } from '@src/infrastructure/types';
+import { LoggerModule } from '@hoplin/nestjs-logger';
 
 describe('MemberService', () => {
   let service: MemberService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        LoggerModule.forRoot({
+          applicationName: 'test',
+        }),
+      ],
       providers: [
         MemberService,
         {

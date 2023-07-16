@@ -28,6 +28,14 @@ export class UpdateMemberDto implements Partial<MemberEntity> {
   @IsString()
   birth?: Date;
 
+  @ApiProperty({
+    type: String,
+    format: 'binary',
+    required: false,
+  })
+  @IsOptional()
+  profile?: Express.Multer.File;
+
   constructor(data: UpdateMemberDto) {
     Object.assign(this, data);
   }
