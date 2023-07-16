@@ -5,6 +5,7 @@ import { MemberEntity } from '@src/domain/member/member.entity';
 import {
   dataSourceMock,
   departmentRepositoryMockFactory,
+  example_profile,
   memberRepositoryMockFactory,
   mockCreateMemberDto,
   mockCreateMemberDtoInstructor,
@@ -102,14 +103,20 @@ describe('MemberService', () => {
     const originalPassword = mockCreateMemberDto.password;
     let newMemberResult: MemberEntity;
     it('Create new user', async () => {
-      newMemberResult = await service.createMember(mockCreateMemberDto);
+      newMemberResult = await service.createMember(
+        mockCreateMemberDto,
+        example_profile,
+      );
       expect(newMemberResult.groupId).toBe(mockCreateMemberDto.groupId);
       expect(newMemberResult.studentProfile).not.toBeNull();
       expect(newMemberResult.instructorProfile).toBeUndefined();
     });
 
     it('Member with same group id exist', async () => {
-      const result = await service.createMember(mockCreateMemberDto);
+      const result = await service.createMember(
+        mockCreateMemberDto,
+        example_profile,
+      );
       expect(result).toBe(false);
     });
 
@@ -140,6 +147,7 @@ describe('MemberService', () => {
     it('Create new user', async () => {
       newMemberResult = await service.createMember(
         mockCreateMemberDtoInstructor,
+        example_profile,
       );
       expect(newMemberResult.groupId).toBe(
         mockCreateMemberDtoInstructor.groupId,
@@ -150,7 +158,10 @@ describe('MemberService', () => {
     });
 
     it('Member with same group id exist', async () => {
-      const result = await service.createMember(mockCreateMemberDtoInstructor);
+      const result = await service.createMember(
+        mockCreateMemberDtoInstructor,
+        example_profile,
+      );
       expect(result).toBe(false);
     });
 

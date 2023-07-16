@@ -8,6 +8,7 @@ import { MockType, RepositoryMockFactory } from '@src/infrastructure/test';
 import { DepartmentEntity } from '@src/domain/department/department.entity';
 import { DataSource, EntityManager, FindOptionsWhere } from 'typeorm';
 import { MemberNotFound } from '@src/infrastructure/exceptions';
+import { Readable } from 'stream';
 
 export let mockMemberEntities: MemberEntity[] = [
   new MemberEntity({
@@ -135,4 +136,17 @@ export const dataSourceMock: MockType<Partial<DataSource>> = {
   transaction: jest.fn(async (cb) => {
     return await cb(mockEntityManager);
   }),
+};
+
+export const example_profile: Express.Multer.File = {
+  filename: './test.jpg',
+  fieldname: '',
+  originalname: '',
+  encoding: '',
+  mimetype: '',
+  size: 0,
+  stream: new Readable(),
+  destination: '',
+  path: '',
+  buffer: undefined,
 };

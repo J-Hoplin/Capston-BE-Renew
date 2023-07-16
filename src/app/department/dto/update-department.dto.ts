@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MemberEntity } from '@src/domain/member/member.entity';
+import { DepartmentEntity } from '@src/domain/department/department.entity';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateMemberDto implements Partial<MemberEntity> {
+export class UpdateDepartmentDto implements Partial<DepartmentEntity> {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  id!: number; // Will be deleted after auth API generated
+  id!: number;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -16,19 +16,22 @@ export class UpdateMemberDto implements Partial<MemberEntity> {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  changedpassword?: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  originalpassword!: string;
+  phoneNumber?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  birth?: Date;
+  url?: string;
 
-  constructor(data: UpdateMemberDto) {
+  @ApiProperty({
+    type: String,
+    format: 'binary',
+    required: false,
+  })
+  @IsOptional()
+  profile?: Express.Multer.File;
+
+  constructor(data: UpdateDepartmentDto) {
     Object.assign(this, data);
   }
 }

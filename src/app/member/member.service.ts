@@ -73,7 +73,10 @@ export class MemberService {
     return result;
   }
 
-  public async createMember(body: CreateMemberDto): Promise<MemberEntity> {
+  public async createMember(
+    body: CreateMemberDto,
+    profileImage: Express.Multer.File,
+  ): Promise<MemberEntity> {
     // Check department exist
     const findDepartmentById = await this.departmentRepository.findOneBy({
       id: body.departmentId,
@@ -96,6 +99,12 @@ export class MemberService {
         const newMember = new MemberEntity(body);
         const groupId = body.groupId;
         const departmentId = body.departmentId;
+        // Set profile picture destination
+        newMember.profileImgURL = profileImage
+          ? profileImage.destination
+          : null;
+
+        // Set member approval
         newMember.approvedReason = 'New Member';
         // If role is instructor
         if (body.memberRole === member.Role.INSTRUCTOR) {
