@@ -10,6 +10,36 @@ import { DataSource, EntityManager, FindOptionsWhere } from 'typeorm';
 import { MemberNotFound } from '@src/infrastructure/exceptions';
 import { Readable } from 'stream';
 
+export const mockCreateMemberDtoStudent: (id: number) => CreateMemberDto = (
+  did: number,
+) => {
+  return {
+    name: 'test',
+    password: 'test',
+    email: 'jhoplin72510@gmail.com',
+    groupId: 'b889049',
+    sex: member.Sex.MALE,
+    birth: new Date(),
+    memberRole: member.Role.STUDENT,
+    departmentId: did,
+  };
+};
+
+export const mockCreateMemberDtoInstructorS: (id: number) => CreateMemberDto = (
+  did: number,
+) => ({
+  name: 'test',
+  password: 'test',
+  email: 'jsbn@gmail.com',
+  groupId: 'instructor123',
+  sex: member.Sex.MALE,
+  birth: new Date(),
+  memberRole: member.Role.INSTRUCTOR,
+  departmentId: did,
+});
+
+// For controller
+
 export let mockMemberEntities: MemberEntity[] = [
   new MemberEntity({
     id: 1,

@@ -6,6 +6,7 @@ import {
   MemberNotFound,
   DepartmentNotFound,
   PasswordUnmatched,
+  GroupIDAlreadyTaken,
 } from '@infrastructure/exceptions';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { ConfigType } from '@nestjs/config';
@@ -90,6 +91,14 @@ export class MemberService {
       throw new DepartmentNotFound(
         `Department with id ${body.departmentId} not found`,
       );
+    }
+
+    // Check group id exist
+    const findMemberByGid = await this.memberRepository.findOneBy({
+      groupId: body.groupId,
+    });
+    if (findMemberByGid) {
+      throw new GroupIDAlreadyTaken(body.groupId);
     }
 
     // encrypt password

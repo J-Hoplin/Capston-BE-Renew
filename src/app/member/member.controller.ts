@@ -42,6 +42,7 @@ import { UpdateMemberApprovalDto } from './dto/updateMemberApproval.dto';
 import { CommonResponseDto } from '@src/infrastructure/common/common.response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageLocalDiskOption } from '@src/infrastructure/multer';
+import { join } from 'path';
 
 @ApiTags('Member')
 @Controller('member')
@@ -114,7 +115,11 @@ export class MemberController {
     description: new UnprocessableEntityException().message,
   })
   @ApiBadRequestResponse({
-    description: DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound,
+    description: join(
+      ', ',
+      DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound,
+      MEMBER_EXCEPTION_MSG.GroupIDAlreadyTaken,
+    ),
   })
   public async createMember(
     @Body() body: CreateMemberDto,
