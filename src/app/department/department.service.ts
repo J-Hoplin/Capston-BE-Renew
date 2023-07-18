@@ -36,10 +36,14 @@ export class DepartmentService {
     id: number,
     detail: boolean,
   ): Promise<DepartmentEntity> {
-    const result = await this.departmentRepository.findOneBy({
-      id,
-      students: detail,
-      instructors: detail,
+    const result = await this.departmentRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        students: detail,
+        instructors: detail,
+      },
     });
     return result;
   }
@@ -84,16 +88,19 @@ export class DepartmentService {
     const checkDepartmentExist = await this.departmentRepository.findOneBy({
       id: body.id,
     });
-    if (checkDepartmentExist) {
+    if (!checkDepartmentExist) {
       throw new DepartmentNotFound();
     }
     // If user try to change department's name
-    if (body.name) {
-      const checkNameTaken = await this.departmentRepository.findOneBy({
-        name: body.name,
-      });
-      if (checkNameTaken) {
-        throw new DepartmentNameAlreadyTaken(body.name);
+    // Ignore if same name with previous
+    if (!(checkDepartmentExist.name === body.name)) {
+      if (body.name) {
+        const checkNameTaken = await this.departmentRepository.findOneBy({
+          name: body.name,
+        });
+        if (checkNameTaken) {
+          throw new DepartmentNameAlreadyTaken(body.name);
+        }
       }
     }
     // Update
@@ -144,19 +151,27 @@ export class DepartmentService {
 
   public async deleteDepartment(body: DeleteDepartmentDto): Promise<boolean> {
     // Find department exist
-    const findDepartment = await this.departmentRepository.findOneBy({
-      id: body.id,
+    const findDepartment = await this.departmentRepository.findOne({
+      where: {
+        id: body.id,
+      },
+      relations: {
+        students: true,
+        instructors: true,
+      },
     });
     if (!findDepartment) {
       throw new DepartmentNotFound();
     }
-    // All of the members should not belongs to department when you want to delete it.
+    // All of the members should no t belongs to department when you want to delete it.
     if (findDepartment.students.length || findDepartment.instructors.length) {
       throw new MemberStillBelongsToDepartment();
     }
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const departmentRepository = manager.getRepository(DepartmentEntity);
-      await departmentRepository.delete(findDepartment);
+      await departmentRepository.delete({
+        id: findDepartment.id,
+      });
       this.logger.log(`Department removed : ${findDepartment.name}`);
     });
     return true;

@@ -78,7 +78,7 @@ export class MemberService {
 
   public async createMember(
     body: CreateMemberDto,
-    profileImage: Express.Multer.File,
+    profileImage?: Express.Multer.File,
   ): Promise<MemberEntity> {
     // Check department exist
     const findDepartmentById = await this.departmentRepository.findOneBy({

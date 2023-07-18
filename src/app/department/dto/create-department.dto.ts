@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateMemberDto } from '@src/app/member/dto/create-member.dto';
 import { DepartmentEntity } from '@src/domain/department/department.entity';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class CreateDepartmentDto implements Partial<DepartmentEntity> {
   @ApiProperty()
@@ -16,7 +16,7 @@ export class CreateDepartmentDto implements Partial<DepartmentEntity> {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsString()
+  @IsUrl()
   url?: string;
 
   @ApiProperty({
