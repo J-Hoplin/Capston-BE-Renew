@@ -7,7 +7,6 @@ export enum JwtSubjectType {
 
 export interface JwtPayload {
   user_id?: number;
-  user_role?: member.Role;
 }
 
 export interface JwtDecodedPayload extends JwtPayload {

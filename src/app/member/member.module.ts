@@ -15,5 +15,6 @@ import { LoggerModule } from '@hoplin/nestjs-logger';
   ],
   providers: [MemberService],
   controllers: [MemberController],
+  exports: [MemberService],
 })
 export class MemberModule {}

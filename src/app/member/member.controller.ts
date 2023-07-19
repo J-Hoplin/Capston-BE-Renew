@@ -115,11 +115,10 @@ export class MemberController {
     description: new UnprocessableEntityException().message,
   })
   @ApiBadRequestResponse({
-    description: join(
-      ', ',
+    description: [
       DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound,
       MEMBER_EXCEPTION_MSG.GroupIDAlreadyTaken,
-    ),
+    ].join(', '),
   })
   public async createMember(
     @Body() body: CreateMemberDto,

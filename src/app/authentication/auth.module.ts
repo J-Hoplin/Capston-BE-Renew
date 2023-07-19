@@ -7,11 +7,17 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthenticationService } from './authentication.service';
-
+import jwtConfig from '@src/config/config/jwt.config';
+import defaultConfig from '@src/config/config/default.config';
+import { MemberModule } from '../member/member.module';
+import { RedisCacheModule } from '../redis-cache/redis-cache.module';
+import { MailModule } from '../mail/mail.module';
 @Module({
   imports: [
     LoggerModule.forFeature(),
     TypeOrmModule.forFeature([MemberEntity]),
+    ConfigModule.forFeature(jwtConfig),
+    ConfigModule.forFeature(defaultConfig),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
@@ -28,6 +34,9 @@ import { AuthenticationService } from './authentication.service';
         };
       },
     }),
+    RedisCacheModule,
+    MemberModule,
+    MailModule,
   ],
   providers: [JwtStrategy, AuthenticationService],
   controllers: [AuthController],

@@ -13,7 +13,6 @@ import { CreateMemberDto } from './dto/create-member.dto';
 import { ConfigType } from '@nestjs/config';
 import defaultConfig from '@src/config/config/default.config';
 import { DepartmentEntity } from '@src/domain/department/department.entity';
-import * as bcrypt from 'bcryptjs';
 import { member } from '@src/infrastructure/types';
 import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
 import { StudentEntity } from '@src/domain/student/student.entity';
@@ -22,6 +21,7 @@ import { DeleteMemberDto } from './dto/delete-member.dto';
 import { UpdateMemberApprovalDto } from './dto/updateMemberApproval.dto';
 import * as fs from 'fs';
 import { Logger, LoggerModule } from '@hoplin/nestjs-logger';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class MemberService {
@@ -35,7 +35,6 @@ export class MemberService {
     private readonly config: ConfigType<typeof defaultConfig>,
     private readonly logger: Logger,
   ) {}
-
   public async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, +this.config.hashCount);
   }
@@ -61,6 +60,16 @@ export class MemberService {
   public async getMemberById(id: number): Promise<MemberEntity> {
     const result = await this.memberRepository.findOneBy({
       id,
+    });
+    if (!result) {
+      throw new MemberNotFound();
+    }
+    return result;
+  }
+
+  public async getMemberByEmail(email: string): Promise<MemberEntity> {
+    const result = await this.memberRepository.findOneBy({
+      email,
     });
     if (!result) {
       throw new MemberNotFound();
