@@ -21,6 +21,7 @@ describe('DepartmentController', () => {
             createDepartment: jest.fn(),
             updateDepartment: jest.fn(),
             deleteDepartment: jest.fn(),
+            checkDepartmentNameTaken: jest.fn(),
           },
         },
       ],
@@ -45,6 +46,12 @@ describe('DepartmentController', () => {
     it('Should call createDepartment once', async () => {
       const spy = jest.spyOn(service, 'createDepartment');
       await controller.createDepartment({} as CreateDepartmentDto);
+      expect(spy).toBeCalledTimes(1);
+    });
+
+    it('Should call checkDepartmentNameTaken', async () => {
+      const spy = jest.spyOn(service, 'checkDepartmentNameTaken');
+      await controller.checkDepartmentNameTaken('test');
       expect(spy).toBeCalledTimes(1);
     });
 

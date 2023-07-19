@@ -8,7 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './options/typeorm.option';
 import { HealthModule } from './app/health/health.module';
 import { MemberModule } from './app/member/member.module';
-import { AuthModule } from './app/auth/auth.module';
+import { AuthModule } from './app/authentication/auth.module';
 import { MailModule } from './app/mail/mail.module';
 import { DepartmentModule } from './app/department/department.module';
 

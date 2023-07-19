@@ -1,22 +1,20 @@
 import { BadRequestException } from '@nestjs/common';
 
 export const DEPARTMENT_EXCEPTION_MSG = {
-  DepartmentNotFound: 'Department not found',
-  DepartmentNameAlreadyTaken: 'Department name already taken',
-  MemberStillBelongsToDepartment: 'Some member still belongs to department',
+  DepartmentNotFound: 'DEPARTMENT_NOT_FOUND',
+  DepartmentNameAlreadyTaken: 'DEPARTMENT_NAME_ALREADY_TAKE',
+  MemberStillBelongsToDepartment: 'SOME_MEMBER_STILL_BELONGS_TO_DEPARTMENT',
 };
 
 export class DepartmentNotFound extends BadRequestException {
-  constructor(msg?: string) {
-    super(msg ? msg : DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound);
+  constructor() {
+    super(DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound);
   }
 }
 
 export class DepartmentNameAlreadyTaken extends BadRequestException {
-  constructor(departmentName: string) {
-    super(
-      `${DEPARTMENT_EXCEPTION_MSG.DepartmentNameAlreadyTaken} : ${departmentName}`,
-    );
+  constructor() {
+    super(`${DEPARTMENT_EXCEPTION_MSG.DepartmentNameAlreadyTaken}`);
   }
 }
 

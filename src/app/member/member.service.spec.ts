@@ -10,6 +10,7 @@ import { DepartmentEntity } from '@src/domain/department/department.entity';
 import defaultConfig from '@src/config/config/default.config';
 import { DataSource } from 'typeorm';
 import {
+  EmailAlreadyTaken,
   GroupIDAlreadyTaken,
   MemberNotFound,
   PasswordUnmatched,
@@ -104,6 +105,24 @@ describe('MemberService', () => {
 
   // Create
   describe('Generate member', () => {
+    it('Email should not be taken', async () => {
+      // Given
+      const email = mockCreateMemberDtoStudent(1).email;
+      // When
+      const result = await service.checkEmailTaken(email);
+      // Then
+      expect(result).toBe(true);
+    });
+
+    it('Group ID should not be taken', async () => {
+      // Given
+      const gid = mockCreateMemberDtoStudent(1).groupId;
+      // When
+      const result = await service.checkGidTaken(gid);
+      // Then
+      expect(result).toBe(true);
+    });
+
     it('Should generate member - student', async () => {
       // Create department
       const repo = dataSource.getRepository(DepartmentEntity);
@@ -127,6 +146,30 @@ describe('MemberService', () => {
       expect(memberInstructor).not.toBeUndefined();
       expect(memberInstructor.approved).toBe(member.Approve.PENDING);
       expect(memberInstructor.id).not.toBeUndefined();
+    });
+
+    it('Email should not be taken', async () => {
+      // Given
+      const email = mockCreateMemberDtoStudent(1).email;
+      try {
+        // When
+        const result = await service.checkEmailTaken(email);
+      } catch (err) {
+        // Then
+        expect(err).toBeInstanceOf(EmailAlreadyTaken);
+      }
+    });
+
+    it('Group ID should not be taken', async () => {
+      // Given
+      const gid = mockCreateMemberDtoStudent(1).groupId;
+      try {
+        // When
+        const result = await service.checkGidTaken(gid);
+      } catch (err) {
+        // Then
+        expect(err).toBeInstanceOf(GroupIDAlreadyTaken);
+      }
     });
 
     it('Unable to generate member reason of existing group id', async () => {

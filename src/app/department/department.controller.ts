@@ -70,6 +70,19 @@ export class DepartmentController {
     return await this.departmentService.getDepartmentById(id, detail);
   }
 
+  @Get('/name/:name')
+  @ApiOperation({ summary: '학부 이름 중복 체크' })
+  @ApiOkResponse({ type: CommonResponseDto })
+  @ApiBadRequestResponse({
+    description: DEPARTMENT_EXCEPTION_MSG.DepartmentNameAlreadyTaken,
+  })
+  public async checkDepartmentNameTaken(@Param('name') name: string) {
+    const result = new CommonResponseDto(
+      await this.departmentService.checkDepartmentNameTaken(name),
+    );
+    return result;
+  }
+
   @Post('/')
   @ApiOperation({
     summary: '새 학부(혹은 부서)를 생성합니다',

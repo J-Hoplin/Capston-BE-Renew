@@ -176,6 +176,32 @@ export class MemberController {
     return await this.memberService.updateMember(body, file);
   }
 
+  @Get('/email/:email')
+  @ApiOperation({ summary: 'Email 중복체크를 진행합니다' })
+  @ApiOkResponse({ type: CommonResponseDto })
+  @ApiBadRequestResponse({
+    description: MEMBER_EXCEPTION_MSG.EmailAlreadyTaken,
+  })
+  public async checkEmailTaken(@Param('email') email: string) {
+    const result = new CommonResponseDto(
+      await this.memberService.checkEmailTaken(email),
+    );
+    return result;
+  }
+
+  @Get('/gid/:gid')
+  @ApiOperation({ summary: 'Group ID 중복체크를 진행합니다' })
+  @ApiOkResponse({ type: CommonResponseDto })
+  @ApiBadRequestResponse({
+    description: MEMBER_EXCEPTION_MSG.GroupIDAlreadyTaken,
+  })
+  public async checkGidTaken(@Param('gid') gid: string) {
+    const result = new CommonResponseDto(
+      await this.memberService.checkGidTaken(gid),
+    );
+    return result;
+  }
+
   @Get('/approval/:id')
   @ApiOperation({
     summary: '회원 계정 상태를 조회합니다',

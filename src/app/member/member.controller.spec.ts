@@ -41,6 +41,8 @@ describe('MemberController', () => {
             getMemberApproval: jest.fn(),
             updateMemberApproval: jest.fn(),
             deleteMember: jest.fn(),
+            checkEmailTaken: jest.fn(),
+            checkGidTaken: jest.fn(),
           },
         },
       ],
@@ -92,6 +94,23 @@ describe('MemberController', () => {
       expect(await controller.getMemberByGroupId(gid)).toMatchObject(
         findMember,
       );
+      expect(spy).toBeCalledTimes(1);
+    });
+  });
+
+  describe('Check email and group id taken', () => {
+    const gid = 'abcd';
+    const email = 'jhoplin7259@gmail.com';
+
+    it('Should check email already taken', async () => {
+      const spy = jest.spyOn(service, 'checkEmailTaken');
+      await controller.checkEmailTaken(email);
+      expect(spy).toBeCalledTimes(1);
+    });
+
+    it('Should check gid already taken', async () => {
+      const spy = jest.spyOn(service, 'checkGidTaken');
+      await controller.checkGidTaken(gid);
       expect(spy).toBeCalledTimes(1);
     });
   });

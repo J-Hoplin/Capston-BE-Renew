@@ -1,4 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Post, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Auth')
@@ -9,4 +9,10 @@ export class AuthController {
 
   @Post('/refresh')
   public async refresh() {}
+
+  @Get('/email')
+  public async checkEmailCode() {}
+
+  @Post('/email')
+  public async sendEmailCode() {}
 }

@@ -80,6 +80,15 @@ describe('DepartmentService', () => {
   let newMember: DepartmentEntity;
   let newMember2: DepartmentEntity;
   describe('Create a new Department', () => {
+    it('Department name should not be taken yet', async () => {
+      // Given
+      const name = mockDepartment1.name;
+      // when
+      const result = await service.checkDepartmentNameTaken(name);
+      // then
+      expect(result).toBe(true);
+    });
+
     it('Should create new department', async () => {
       // Given
       const department1 = mockDepartment1;
@@ -95,6 +104,18 @@ describe('DepartmentService', () => {
       expect(newMember2.id).not.toBeUndefined();
       expect(newMember2.name).toBe(department2.name);
       expect(newMember2.url).toBe(department2.url);
+    });
+
+    it('Department name should be taken', async () => {
+      // Given
+      const name = mockDepartment1.name;
+      // when
+      try {
+        const result = await service.checkDepartmentNameTaken(name);
+      } catch (err) {
+        // then
+        expect(err).toBeInstanceOf(DepartmentNameAlreadyTaken);
+      }
     });
 
     it('Should throw new error, reason of same name', async () => {

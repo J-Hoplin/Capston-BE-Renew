@@ -7,6 +7,7 @@ import {
   DepartmentNotFound,
   PasswordUnmatched,
   GroupIDAlreadyTaken,
+  EmailAlreadyTaken,
 } from '@infrastructure/exceptions';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { ConfigType } from '@nestjs/config';
@@ -62,7 +63,7 @@ export class MemberService {
       id,
     });
     if (!result) {
-      throw new MemberNotFound(`Member with id ${id} not found`);
+      throw new MemberNotFound();
     }
     return result;
   }
@@ -72,7 +73,7 @@ export class MemberService {
       groupId,
     });
     if (!result) {
-      throw new MemberNotFound(`Member with group id ${groupId} not found`);
+      throw new MemberNotFound();
     }
     return result;
   }
@@ -88,19 +89,13 @@ export class MemberService {
 
     // Make exception if not exist
     if (!findDepartmentById) {
-      throw new DepartmentNotFound(
-        `Department with id ${body.departmentId} not found`,
-      );
+      throw new DepartmentNotFound();
     }
 
     // Check group id exist
-    const findMemberByGid = await this.memberRepository.findOneBy({
-      groupId: body.groupId,
-    });
-    if (findMemberByGid) {
-      throw new GroupIDAlreadyTaken(body.groupId);
-    }
-
+    await this.checkGidTaken(body.groupId);
+    // Check email taken
+    await this.checkEmailTaken(body.email);
     // encrypt password
     body.password = await this.hashPassword(body.password);
 
@@ -157,7 +152,7 @@ export class MemberService {
     });
     // Check member exist
     if (!findMember) {
-      throw new MemberNotFound(`Member with ID ${body.id} not found`);
+      throw new MemberNotFound();
     }
     const checkPassword = await this.comparePassword(
       body.originalpassword,
@@ -197,12 +192,32 @@ export class MemberService {
     return updatedMember;
   }
 
+  public async checkEmailTaken(email: string) {
+    const findMember = await this.memberRepository.findOneBy({
+      email,
+    });
+    if (findMember) {
+      throw new EmailAlreadyTaken();
+    }
+    return true;
+  }
+
+  public async checkGidTaken(gid: string) {
+    const findMember = await this.memberRepository.findOneBy({
+      groupId: gid,
+    });
+    if (findMember) {
+      throw new GroupIDAlreadyTaken();
+    }
+    return true;
+  }
+
   public async getMemberApproval(id: number): Promise<member.Approve> {
     const findMember = await this.memberRepository.findOneBy({
       id,
     });
     if (!findMember) {
-      throw new MemberNotFound(`Member with ID ${id} not found`);
+      throw new MemberNotFound();
     }
     return findMember.approved;
   }
@@ -215,7 +230,7 @@ export class MemberService {
     });
     // Check memer exist
     if (!findMember) {
-      throw new MemberNotFound(`Member with ID ${body.id} not found`);
+      throw new MemberNotFound();
     }
     const originalApproval = findMember.approved;
     findMember.approved = body.approved;
@@ -236,7 +251,7 @@ export class MemberService {
     });
     // Check member exist
     if (!findMember) {
-      throw new MemberNotFound(`Member with ID ${body.id} not found`);
+      throw new MemberNotFound();
     }
     const checkPassword = await this.comparePassword(
       body.password,

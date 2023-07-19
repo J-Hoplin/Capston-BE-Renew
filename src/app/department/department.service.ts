@@ -48,6 +48,16 @@ export class DepartmentService {
     return result;
   }
 
+  public async checkDepartmentNameTaken(name: string) {
+    const result = await this.departmentRepository.findOneBy({
+      name,
+    });
+    if (result) {
+      throw new DepartmentNameAlreadyTaken();
+    }
+    return true;
+  }
+
   public async createDepartment(
     body: CreateDepartmentDto,
     profile?: Express.Multer.File,
@@ -57,7 +67,7 @@ export class DepartmentService {
       name: body.name,
     });
     if (checkNameTaken) {
-      throw new DepartmentNameAlreadyTaken(body.name);
+      throw new DepartmentNameAlreadyTaken();
     }
     const newDepartment = await this.dataSource.transaction(
       async (entityManager: EntityManager) => {
@@ -99,7 +109,7 @@ export class DepartmentService {
           name: body.name,
         });
         if (checkNameTaken) {
-          throw new DepartmentNameAlreadyTaken(body.name);
+          throw new DepartmentNameAlreadyTaken();
         }
       }
     }
