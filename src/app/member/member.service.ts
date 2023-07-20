@@ -57,6 +57,10 @@ export class MemberService {
     return result;
   }
 
+  public async save(member: MemberEntity): Promise<MemberEntity> {
+    return await this.memberRepository.save(member);
+  }
+
   public async getMemberById(id: number): Promise<MemberEntity> {
     const result = await this.memberRepository.findOneBy({
       id,

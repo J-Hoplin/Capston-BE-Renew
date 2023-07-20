@@ -14,6 +14,7 @@ export const AUTH_EXCEPTION_MSG = {
   InvalidMemberApproval: 'INVALID_MEMBER_APPROVAL',
   EmailYetConfirmed: 'EMAIL_YET_CONFIRMED',
   TokenNotFound: 'TOKEN_NOT_FOUND',
+  NotBearerToken: 'NOT_BEARER_TOKEN',
 };
 
 export class PasswordUnmatched extends UnauthorizedException {
@@ -72,5 +73,11 @@ export class EmailYetConfirmed extends UnprocessableEntityException {
 export class TokenNotFound extends UnprocessableEntityException {
   constructor() {
     super(AUTH_EXCEPTION_MSG.TokenNotFound);
+  }
+}
+
+export class NotBearerToken extends UnauthorizedException {
+  constructor() {
+    super(AUTH_EXCEPTION_MSG.NotBearerToken);
   }
 }

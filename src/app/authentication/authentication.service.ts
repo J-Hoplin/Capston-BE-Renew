@@ -15,6 +15,7 @@ import {
   IllegalTokenDetected,
   InvalidMemberApproval,
   MemberNotFound,
+  NotBearerToken,
   PasswordUnmatched,
   RefreshTokenExpired,
   RefreshTokenRequired,
@@ -42,8 +43,6 @@ import { emailVerificationHTML } from './mail/email-verification.html';
 export class AuthenticationService {
   private emailConfirmSubject = 'EMAIL_CONFIRM';
   constructor(
-    @InjectRepository(MemberEntity)
-    private readonly memberRepository: Repository<MemberEntity>,
     private readonly jwtService: JwtService,
     private readonly cacheService: RedisCacheService,
     private readonly memberService: MemberService,
@@ -61,7 +60,10 @@ export class AuthenticationService {
     let token: string;
     try {
       // Extract bearer token
-      const [_, bearerToken] = authorizaitonHeader.split(' ');
+      const [format, bearerToken] = authorizaitonHeader.split(' ');
+      if (format !== 'Bearer') {
+        throw new NotBearerToken();
+      }
       token = bearerToken;
     } catch (err) {
       throw new BearerTokenRequired();
@@ -122,6 +124,7 @@ export class AuthenticationService {
 
     // Refresh token TTL : 1 Week
     // Enroll refresh token
+    console.log('here');
     await this.cacheService.set(
       this.getRefreshTokenKeyPreset(findMember),
       refreshToken,
@@ -178,7 +181,7 @@ export class AuthenticationService {
       // Find member based on payload
       const findMember = await this.memberService.getMemberById(member.user_id);
       findMember.emailConfirmed = true;
-      await this.memberRepository.save(findMember);
+      await this.memberService.save(findMember);
 
       // Delete key-value from redis
       await this.cacheService.del(key);

@@ -64,6 +64,7 @@ export class AuthController {
       AUTH_EXCEPTION_MSG.RefreshTokenRequired,
       AUTH_EXCEPTION_MSG.RefreshTokenExpired,
       AUTH_EXCEPTION_MSG.IllegalTokenDetected,
+      AUTH_EXCEPTION_MSG.NotBearerToken,
     ].join(', '),
   })
   @ApiBearerAuth()
