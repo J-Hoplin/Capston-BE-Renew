@@ -8,6 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './options/typeorm.option';
 import { HealthModule } from './app/health/health.module';
 import { MemberModule } from './app/member/member.module';
+import { AuthModule } from './app/authentication/auth.module';
+import { MailModule } from './app/mail/mail.module';
+import { DepartmentModule } from './app/department/department.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { MemberModule } from './app/member/member.module';
     TypeOrmModule.forRootAsync(typeORMConfig),
     HealthModule,
     MemberModule,
+    AuthModule,
+    MailModule,
+    DepartmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

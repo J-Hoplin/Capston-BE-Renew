@@ -2,13 +2,14 @@ version: '3.7'
 services:
   api:
     build: .
-    image: "capston-design-be-dev"
+    image: 'capston-design-be-dev'
     ports:
-      - "3000:3000"
-    restart: "unless-stopped"
+      - '3000:3000'
+    restart: 'unless-stopped'
     depends_on:
       - db
       - mongo
+      - redis
     networks:
       - api-network
     volumes:
@@ -16,8 +17,8 @@ services:
   db:
     image: mysql
     ports:
-      - "3306:3306"
-    restart: "unless-stopped"
+      - '3306:3306'
+    restart: 'unless-stopped'
     environment:
       - MYSQL_ROOT_PASSWORD=hoplin1234!
       - MYSQL_ROOT_HOST=%
@@ -27,12 +28,18 @@ services:
   mongo:
     image: mongo
     ports:
-      - "27017:27017"
-    restart: "unless-stopped"
+      - '27017:27017'
+    restart: 'unless-stopped'
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password1234!
       - MONGO_INITDB_DATABASE=cloud-edu
+    networks:
+      - api-network
+  redis:
+    image: arm64v8/redis
+    ports:
+      - '6379:6379'
     networks:
       - api-network
 networks:

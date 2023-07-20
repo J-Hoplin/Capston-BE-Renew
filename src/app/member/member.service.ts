@@ -6,18 +6,22 @@ import {
   MemberNotFound,
   DepartmentNotFound,
   PasswordUnmatched,
+  GroupIDAlreadyTaken,
+  EmailAlreadyTaken,
 } from '@infrastructure/exceptions';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { ConfigType } from '@nestjs/config';
 import defaultConfig from '@src/config/config/default.config';
 import { DepartmentEntity } from '@src/domain/department/department.entity';
-import * as bcrypt from 'bcryptjs';
 import { member } from '@src/infrastructure/types';
 import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
 import { StudentEntity } from '@src/domain/student/student.entity';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { DeleteMemberDto } from './dto/delete-member.dto';
 import { UpdateMemberApprovalDto } from './dto/updateMemberApproval.dto';
+import * as fs from 'fs';
+import { Logger, LoggerModule } from '@hoplin/nestjs-logger';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class MemberService {
@@ -29,13 +33,13 @@ export class MemberService {
     private readonly dataSource: DataSource,
     @Inject(defaultConfig.KEY)
     private readonly config: ConfigType<typeof defaultConfig>,
+    private readonly logger: Logger,
   ) {}
-
-  private async hashPassword(password: string): Promise<string> {
+  public async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, +this.config.hashCount);
   }
 
-  private async comparePassword(
+  public async comparePassword(
     password: string,
     hashedPassword: string,
   ): Promise<boolean> {
@@ -53,12 +57,26 @@ export class MemberService {
     return result;
   }
 
+  public async save(member: MemberEntity): Promise<MemberEntity> {
+    return await this.memberRepository.save(member);
+  }
+
   public async getMemberById(id: number): Promise<MemberEntity> {
     const result = await this.memberRepository.findOneBy({
       id,
     });
     if (!result) {
-      throw new MemberNotFound(`Member with id ${id} not found`);
+      throw new MemberNotFound();
+    }
+    return result;
+  }
+
+  public async getMemberByEmail(email: string): Promise<MemberEntity> {
+    const result = await this.memberRepository.findOneBy({
+      email,
+    });
+    if (!result) {
+      throw new MemberNotFound();
     }
     return result;
   }
@@ -68,12 +86,15 @@ export class MemberService {
       groupId,
     });
     if (!result) {
-      throw new MemberNotFound(`Member with group id ${groupId} not found`);
+      throw new MemberNotFound();
     }
     return result;
   }
 
-  public async createMember(body: CreateMemberDto): Promise<MemberEntity> {
+  public async createMember(
+    body: CreateMemberDto,
+    profileImage?: Express.Multer.File,
+  ): Promise<MemberEntity> {
     // Check department exist
     const findDepartmentById = await this.departmentRepository.findOneBy({
       id: body.departmentId,
@@ -81,11 +102,13 @@ export class MemberService {
 
     // Make exception if not exist
     if (!findDepartmentById) {
-      throw new DepartmentNotFound(
-        `Department with id ${body.departmentId} not found`,
-      );
+      throw new DepartmentNotFound();
     }
 
+    // Check group id exist
+    await this.checkGidTaken(body.groupId);
+    // Check email taken
+    await this.checkEmailTaken(body.email);
     // encrypt password
     body.password = await this.hashPassword(body.password);
 
@@ -96,6 +119,12 @@ export class MemberService {
         const newMember = new MemberEntity(body);
         const groupId = body.groupId;
         const departmentId = body.departmentId;
+        // Set profile picture destination
+        newMember.profileImgURL = profileImage
+          ? profileImage.destination
+          : null;
+
+        // Set member approval
         newMember.approvedReason = 'New Member';
         // If role is instructor
         if (body.memberRole === member.Role.INSTRUCTOR) {
@@ -127,13 +156,16 @@ export class MemberService {
     return newMember;
   }
 
-  public async updateMember(body: UpdateMemberDto): Promise<MemberEntity> {
+  public async updateMember(
+    body: UpdateMemberDto,
+    file?: Express.Multer.File,
+  ): Promise<MemberEntity> {
     const findMember = await this.memberRepository.findOneBy({
       id: body.id,
     });
     // Check member exist
     if (!findMember) {
-      throw new MemberNotFound(`Member with ID ${body.id} not found`);
+      throw new MemberNotFound();
     }
     const checkPassword = await this.comparePassword(
       body.originalpassword,
@@ -151,10 +183,46 @@ export class MemberService {
           ? await this.hashPassword(body.changedpassword)
           : findMember.password;
         findMember.birth = body.birth ? body.birth : findMember.birth;
-        return await memberRepository.save(findMember);
+
+        // Change profile image url
+        if (file) {
+          // Delete previous file
+          fs.unlink(findMember.profileImgURL, (err) => {
+            if (err) {
+              this.logger.error(err);
+            }
+          });
+          findMember.profileImgURL = file.destination;
+        }
+
+        const result = await memberRepository.save(findMember);
+        this.logger.log(
+          `Update member : ${findMember.name}(${findMember.groupId})`,
+        );
+        return result;
       },
     );
     return updatedMember;
+  }
+
+  public async checkEmailTaken(email: string) {
+    const findMember = await this.memberRepository.findOneBy({
+      email,
+    });
+    if (findMember) {
+      throw new EmailAlreadyTaken();
+    }
+    return true;
+  }
+
+  public async checkGidTaken(gid: string) {
+    const findMember = await this.memberRepository.findOneBy({
+      groupId: gid,
+    });
+    if (findMember) {
+      throw new GroupIDAlreadyTaken();
+    }
+    return true;
   }
 
   public async getMemberApproval(id: number): Promise<member.Approve> {
@@ -162,7 +230,7 @@ export class MemberService {
       id,
     });
     if (!findMember) {
-      throw new MemberNotFound(`Member with ID ${id} not found`);
+      throw new MemberNotFound();
     }
     return findMember.approved;
   }
@@ -175,13 +243,17 @@ export class MemberService {
     });
     // Check memer exist
     if (!findMember) {
-      throw new MemberNotFound(`Member with ID ${body.id} not found`);
+      throw new MemberNotFound();
     }
+    const originalApproval = findMember.approved;
     findMember.approved = body.approved;
     findMember.approvedReason = body.approvedReason;
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const memberRepository = manager.getRepository(MemberEntity);
       await memberRepository.save(findMember);
+      this.logger.log(
+        `Update member's approval : ${findMember.name}(${findMember.groupId}), (${originalApproval} -> ${body.approved}, ${body.approvedReason})`,
+      );
     });
     return true;
   }
@@ -192,7 +264,7 @@ export class MemberService {
     });
     // Check member exist
     if (!findMember) {
-      throw new MemberNotFound(`Member with ID ${body.id} not found`);
+      throw new MemberNotFound();
     }
     const checkPassword = await this.comparePassword(
       body.password,
@@ -205,6 +277,9 @@ export class MemberService {
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const memberRepository = manager.getRepository(MemberEntity);
       await memberRepository.delete(findMember);
+      this.logger.log(
+        `Delete member : ${findMember.name}(${findMember.groupId})`,
+      );
     });
     return true;
   }

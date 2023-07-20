@@ -4,22 +4,30 @@ import {
   DefaultValuePipe,
   Delete,
   Get,
+  HttpStatus,
   Param,
   ParseBoolPipe,
+  ParseFilePipe,
+  ParseFilePipeBuilder,
   ParseIntPipe,
   Patch,
   Post,
   Query,
+  UnprocessableEntityException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { MemberEntity } from '@src/domain/member/member.entity';
 import {
   ApiBadRequestResponse,
+  ApiConsumes,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import {
   AUTH_EXCEPTION_MSG,
@@ -32,6 +40,9 @@ import { UpdateMemberDto } from './dto/update-member.dto';
 import { DeleteMemberDto } from './dto/delete-member.dto';
 import { UpdateMemberApprovalDto } from './dto/updateMemberApproval.dto';
 import { CommonResponseDto } from '@src/infrastructure/common/common.response.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { imageLocalDiskOption } from '@src/infrastructure/multer';
+import { join } from 'path';
 
 @ApiTags('Member')
 @Controller('member')
@@ -88,17 +99,43 @@ export class MemberController {
   }
 
   @Post()
+  @UseInterceptors(
+    FileInterceptor(
+      'profile',
+      imageLocalDiskOption(`${__dirname}/../../../profiles`),
+    ),
+  )
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '새로운 회원을 가입시킵니다.',
     description: '비밀번호는 Bcrypt를 사용해 단방향 암호화합니다',
   })
+  @ApiOkResponse({ type: MemberEntity })
+  @ApiUnprocessableEntityResponse({
+    description: new UnprocessableEntityException().message,
+  })
   @ApiBadRequestResponse({
-    description: DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound,
+    description: [
+      DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound,
+      MEMBER_EXCEPTION_MSG.GroupIDAlreadyTaken,
+    ].join(', '),
   })
   public async createMember(
     @Body() body: CreateMemberDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: '.(jpg|png)$',
+        })
+        .addMaxSizeValidator({ maxSize: 1000000 })
+        .build({
+          fileIsRequired: false,
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    profileImage?: Express.Multer.File,
   ): Promise<MemberEntity> {
-    return await this.memberService.createMember(body);
+    return await this.memberService.createMember(body, profileImage);
   }
 
   @Patch()
@@ -107,6 +144,13 @@ export class MemberController {
     description:
       '이름, 비밀번호, 생일 정보만 변경 가능합니다. 회원정보 변경을 위해서는 비밀번호 입력이 필수입니다.',
   })
+  @UseInterceptors(
+    FileInterceptor(
+      'profile',
+      imageLocalDiskOption(`${__dirname}/../../../profiles`),
+    ),
+  )
+  @ApiOkResponse({ type: MemberEntity })
   @ApiBadRequestResponse({
     description: MEMBER_EXCEPTION_MSG.MemberNotFound,
   })
@@ -115,24 +159,62 @@ export class MemberController {
   })
   public async updateMember(
     @Body() body: UpdateMemberDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: '.(jpg|png)$',
+        })
+        .addMaxSizeValidator({ maxSize: 1000000 })
+        .build({
+          fileIsRequired: false,
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file?: Express.Multer.File,
   ): Promise<MemberEntity> {
-    return await this.memberService.updateMember(body);
+    return await this.memberService.updateMember(body, file);
+  }
+
+  @Get('/email/:email')
+  @ApiOperation({ summary: 'Email 중복체크를 진행합니다' })
+  @ApiOkResponse({ type: CommonResponseDto })
+  @ApiBadRequestResponse({
+    description: MEMBER_EXCEPTION_MSG.EmailAlreadyTaken,
+  })
+  public async checkEmailTaken(@Param('email') email: string) {
+    const result = new CommonResponseDto(
+      await this.memberService.checkEmailTaken(email),
+    );
+    return result;
+  }
+
+  @Get('/gid/:gid')
+  @ApiOperation({ summary: 'Group ID 중복체크를 진행합니다' })
+  @ApiOkResponse({ type: CommonResponseDto })
+  @ApiBadRequestResponse({
+    description: MEMBER_EXCEPTION_MSG.GroupIDAlreadyTaken,
+  })
+  public async checkGidTaken(@Param('gid') gid: string) {
+    const result = new CommonResponseDto(
+      await this.memberService.checkGidTaken(gid),
+    );
+    return result;
   }
 
   @Get('/approval/:id')
   @ApiOperation({
     summary: '회원 계정 상태를 조회합니다',
   })
-  @ApiOkResponse({
-    type: CommonResponseDto,
-  })
+  @ApiOkResponse({ type: CommonResponseDto })
   @ApiBadRequestResponse({
     description: MEMBER_EXCEPTION_MSG.MemberNotFound,
   })
   public async getMemberApproval(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CommonResponseDto> {
-    return new CommonResponseDto(this.memberService.getMemberApproval(id));
+    return new CommonResponseDto(
+      await this.memberService.getMemberApproval(id),
+    );
   }
 
   @Patch('/approval')
@@ -141,16 +223,16 @@ export class MemberController {
     description:
       '상태 변경시, 변경 사유를 필수로 입력해야합니다. ex) 계정 정지시 정지사유',
   })
-  @ApiOkResponse({
-    type: CommonResponseDto,
-  })
+  @ApiOkResponse({ type: CommonResponseDto })
   @ApiBadRequestResponse({
     description: MEMBER_EXCEPTION_MSG.MemberNotFound,
   })
   public async updateMemberApproval(
     @Body() body: UpdateMemberApprovalDto,
   ): Promise<CommonResponseDto> {
-    return new CommonResponseDto(this.memberService.updateMemberApproval(body));
+    return new CommonResponseDto(
+      await this.memberService.updateMemberApproval(body),
+    );
   }
 
   @Delete()
@@ -158,16 +240,16 @@ export class MemberController {
     summary: '회원을 탈퇴합니다',
     description: '탈퇴시 비밀번호 확인이 진행됩니다.',
   })
-  @ApiOkResponse({
-    type: CommonResponseDto,
-  })
+  @ApiOkResponse({ type: CommonResponseDto })
   @ApiBadRequestResponse({
     description: MEMBER_EXCEPTION_MSG.MemberNotFound,
   })
   @ApiUnauthorizedResponse({
     description: AUTH_EXCEPTION_MSG.PasswordUnmatched,
   })
-  public async deleteMember(body: DeleteMemberDto): Promise<CommonResponseDto> {
-    return new CommonResponseDto(this.memberService.deleteMember(body));
+  public async deleteMember(
+    @Body() body: DeleteMemberDto,
+  ): Promise<CommonResponseDto> {
+    return new CommonResponseDto(await this.memberService.deleteMember(body));
   }
 }

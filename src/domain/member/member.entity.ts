@@ -72,6 +72,14 @@ export class MemberEntity extends CommonEntity {
   approvedReason: string;
 
   @Column({
+    type: 'boolean',
+    nullable: false,
+    default: false,
+  })
+  @ApiProperty()
+  emailConfirmed: boolean;
+
+  @Column({
     type: 'datetime',
     nullable: false,
   })
