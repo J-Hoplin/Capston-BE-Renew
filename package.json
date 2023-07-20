@@ -87,6 +87,22 @@
       "json",
       "ts"
     ],
+    "coveragePathIgnorePatterns": [
+      ".module.ts",
+      "src/main.ts",
+      ".option.ts",
+      "app.controller.ts",
+      "app.service.ts",
+      ".guard.ts",
+      ".strategy.ts",
+      ".decorator.ts",
+      ".validator.ts",
+      "test/index.ts",
+      "health/",
+      "mail/",
+      "redis-cache/",
+      "infrastructure/"
+    ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
