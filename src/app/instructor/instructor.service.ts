@@ -16,7 +16,7 @@ export class InstructorService {
     private readonly departmentService: DepartmentService,
   ) {}
 
-  public async getInstructorDepartment(id: string): Promise<DepartmentEntity> {
+  public async getInstructorDepartment(id: number): Promise<DepartmentEntity> {
     const result = await this.instructorRepository.findOne({
       where: {
         id,
@@ -32,9 +32,9 @@ export class InstructorService {
     return findDepartment;
   }
 
-  public async getInstructorByGid(gid: string) {
+  public async getInstructorById(id: number) {
     const result = await this.instructorRepository.findOneBy({
-      id: gid,
+      id,
     });
     if (!result) {
       throw new MemberNotFound();

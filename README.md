@@ -47,4 +47,4 @@ docker-compose up -d
 
 ## ERD
 
-![img](./img/API_ERD.png)
+![img](./img/erd2.png)

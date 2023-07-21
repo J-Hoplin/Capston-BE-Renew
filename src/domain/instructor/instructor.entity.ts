@@ -20,7 +20,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class InstructorEntity {
   @PrimaryColumn() // Should be member.groupId
   @ApiProperty()
-  id: string;
+  id: number;
 
   /**
    * Circular Dependency Issue

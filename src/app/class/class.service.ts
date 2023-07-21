@@ -15,14 +15,15 @@ import {
 } from '@src/infrastructure/exceptions/class-image';
 import { classImg } from '@src/infrastructure/types';
 import { Logger } from '@hoplin/nestjs-logger';
+import { MemberService } from '../member/member.service';
 
 @Injectable()
 export class ClassService {
   constructor(
     @InjectRepository(ClassEntity)
     private readonly classRepository: Repository<ClassEntity>,
-    private readonly instructorService: InstructorService,
     private readonly classImageService: ClassImageService,
+    private readonly memberService: MemberService,
     private readonly dataSource: DataSource,
     private readonly logger: Logger,
   ) {}
@@ -64,10 +65,10 @@ export class ClassService {
     return result;
   }
 
-  public async getClassByInstructor(gid: string) {
+  public async getClassByInstructor(id: number) {
     const result = await this.classRepository.find({
       where: {
-        instructorId: gid,
+        id,
       },
     });
     if (!result.length) {
@@ -78,7 +79,7 @@ export class ClassService {
 
   public async createNewClass(body: CreateClassDto) {
     // Check instructor exist
-    const instructor = await this.instructorService.getInstructorByGid(
+    const instructor = await this.memberService.checkApprovedInstructor(
       body.instructorId,
     );
     // If not exist, raise error

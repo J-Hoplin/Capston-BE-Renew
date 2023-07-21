@@ -22,7 +22,7 @@ export class InstructorController {
   })
   @ApiOkResponse({ type: DepartmentEntity })
   @ApiBadRequestResponse({ type: MEMBER_EXCEPTION_MSG.MemberNotFound })
-  public async getInstructorDepartment(@Param('id', ParseIntPipe) id) {
+  public async getInstructorDepartment(@Param('id', ParseIntPipe) id: number) {
     return await this.instructorService.getInstructorDepartment(id);
   }
 }

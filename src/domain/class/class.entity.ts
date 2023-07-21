@@ -37,7 +37,7 @@ export class ClassEntity extends CommonEntity {
     nullable: false,
   })
   @ApiProperty()
-  instructorId: string;
+  instructorId: number;
 
   @Column({
     type: 'enum',

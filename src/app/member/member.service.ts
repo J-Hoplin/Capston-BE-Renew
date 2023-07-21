@@ -8,6 +8,8 @@ import {
   PasswordUnmatched,
   GroupIDAlreadyTaken,
   EmailAlreadyTaken,
+  InvalidMemberApproval,
+  EmailYetConfirmed,
 } from '@infrastructure/exceptions';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { ConfigType } from '@nestjs/config';
@@ -132,7 +134,7 @@ export class MemberService {
           newMember.approved = member.Approve.PENDING;
           // Generate Instructor entity
           const newInstructor = new InstructorEntity({
-            id: groupId,
+            id: newMember.id,
             department: departmentId,
           });
           // Set Instructor Profile
@@ -144,7 +146,7 @@ export class MemberService {
           newMember.approved = member.Approve.APPROVE;
           // Generate Student Entity
           const newStudent = new StudentEntity({
-            id: groupId,
+            id: newMember.id,
             department: departmentId,
           });
           // Set student profile
@@ -282,5 +284,38 @@ export class MemberService {
       );
     });
     return true;
+  }
+
+  public async checkApprovedStudent(id: number) {
+    const findMember = await this.memberRepository.findOne({
+      where: {
+        memberRole: member.Role.STUDENT,
+        id,
+      },
+    });
+    return this.memberValidate(findMember);
+  }
+
+  public async checkApprovedInstructor(id: number) {
+    const findMember = await this.memberRepository.findOne({
+      where: {
+        memberRole: member.Role.INSTRUCTOR,
+        id,
+      },
+    });
+    return this.memberValidate(findMember);
+  }
+
+  private memberValidate(findMember: MemberEntity) {
+    if (!findMember) {
+      throw new MemberNotFound();
+    }
+    if (findMember.approved !== member.Approve.APPROVE) {
+      throw new InvalidMemberApproval();
+    }
+    if (!findMember.emailConfirmed) {
+      throw new EmailYetConfirmed();
+    }
+    return findMember;
   }
 }

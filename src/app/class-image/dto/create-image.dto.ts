@@ -11,7 +11,7 @@ export class CreateImageDto implements Partial<ClassImageEntiy> {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  instructor_id!: string;
+  instructor_id!: number;
 
   @ApiProperty()
   @IsNotEmpty()

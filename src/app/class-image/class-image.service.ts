@@ -7,13 +7,14 @@ import { CreateImageDto } from './dto/create-image.dto';
 import { Logger } from '@hoplin/nestjs-logger';
 import { DeleteDepartmentDto } from '../department/dto/delete-department.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { MemberService } from '../member/member.service';
 
 @Injectable()
 export class ClassImageService {
   constructor(
-    private readonly instructorService: InstructorService,
     @InjectRepository(ClassImageEntiy)
     private readonly classImageRepository: Repository<ClassImageEntiy>,
+    private readonly memberService: MemberService,
     private readonly dataSource: DataSource,
     private readonly logger: Logger,
   ) {}
@@ -46,7 +47,7 @@ export class ClassImageService {
     const { instructor_id } = body;
 
     // Check instructor exist
-    const instructor = await this.instructorService.getInstructorByGid(
+    const instructor = await this.memberService.checkApprovedInstructor(
       instructor_id,
     );
 
@@ -66,7 +67,10 @@ export class ClassImageService {
       },
     );
 
-    // Make promise function to generate class image with option
+    /**
+     *  Make promise function to generate class image with option
+     *
+     */
     return newImage;
   }
 

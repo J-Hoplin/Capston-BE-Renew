@@ -8,12 +8,13 @@ import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
 import { InstructorModule } from '../instructor/instructor.module';
 import { DepartmentModule } from '../department/department.module';
 import { ClassImageModule } from '../class-image/class-image.module';
+import { MemberModule } from '../member/member.module';
 
 @Module({
   imports: [
     LoggerModule.forFeature(),
     TypeOrmModule.forFeature([ClassEntity]),
-    InstructorModule,
+    MemberModule,
     DepartmentModule,
     ClassImageModule,
   ],

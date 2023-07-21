@@ -21,7 +21,7 @@ export class CreateClassDto implements Partial<ClassEntity> {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  instructorId: string;
+  instructorId: number;
 
   @ApiProperty({
     nullable: true,

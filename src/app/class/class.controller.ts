@@ -85,9 +85,9 @@ export class ClassController {
     return await this.classService.getClassByNameAndDivision(name, division);
   }
 
-  @Get('/instructor/:gid')
+  @Get('/instructor/:id')
   @ApiOperation({
-    summary: '강사의 수업들을 나열합니다. 강사의 gid가 요구됩니다.',
+    summary: '강사의 수업들을 나열합니다. 강사의 ID(Member.id)가 요구됩니다.',
   })
   @ApiOkResponse({
     type: ClassEntity,
@@ -96,8 +96,8 @@ export class ClassController {
   @ApiBadRequestResponse({
     description: CLASS_EXCEPTION_MSG.ClassNotFound,
   })
-  public async getClassByInstructor(@Param('gid') gid: string) {
-    return await this.getClassByInstructor(gid);
+  public async getClassByInstructor(@Param('id', ParseIntPipe) id: number) {
+    return await this.getClassByInstructor(id);
   }
 
   @Post()

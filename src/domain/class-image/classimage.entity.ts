@@ -45,7 +45,7 @@ export class ClassImageEntiy extends CommonEntity {
     type: String,
     nullable: false,
   })
-  instructor_id: string;
+  instructor_id: number;
 
   @OneToMany(() => ClassEntity, (cls) => cls.class_image)
   @ApiProperty()

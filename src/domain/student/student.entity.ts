@@ -20,7 +20,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class StudentEntity {
   @PrimaryColumn()
   @ApiProperty()
-  id: string;
+  id: number;
 
   @ManyToOne(() => DepartmentEntity, (department) => department.students, {
     cascade: ['update', 'insert'],
