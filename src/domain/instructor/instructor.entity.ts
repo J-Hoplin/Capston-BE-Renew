@@ -36,14 +36,6 @@ export class InstructorEntity {
   @ApiProperty()
   department: number;
 
-  @OneToMany(() => ClassEntity, (cls) => cls.instructor)
-  @ApiProperty()
-  classes: ClassEntity[];
-
-  @OneToMany(() => ClassImageEntiy, (ci) => ci.instructor)
-  @ApiProperty()
-  images: ClassImageEntiy[];
-
   constructor(data: Partial<InstructorEntity>) {
     Object.assign(this, data);
   }

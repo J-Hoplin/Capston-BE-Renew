@@ -7,17 +7,30 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
+import { ClassEntity } from '../class/class.entity';
+import { classImg } from '@src/infrastructure/types';
 
 @Entity('class-image')
 export class ClassImageEntiy extends CommonEntity {
   @Column({
     type: String,
-    nullable: false,
+    nullable: true,
   })
   @ApiProperty()
-  repositoryEndpoit: string;
+  repositoryEndpoint: string;
+
+  @Column({
+    type: 'enum',
+    enum: classImg.status,
+    default: classImg.status.PENDING,
+  })
+  @ApiProperty({
+    enum: classImg.status,
+  })
+  status: classImg.status;
 
   @UpdateDateColumn()
   @ApiProperty()
@@ -27,12 +40,19 @@ export class ClassImageEntiy extends CommonEntity {
   @ApiProperty()
   createdAt: Date;
 
-  @ManyToOne(() => InstructorEntity, (ins) => ins.images, {
-    cascade: true,
-  })
-  @JoinColumn({
-    name: 'instructor_id',
-  })
   @ApiProperty()
-  instructor: InstructorEntity;
+  @Column({
+    type: String,
+    nullable: false,
+  })
+  instructor_id: string;
+
+  @OneToMany(() => ClassEntity, (cls) => cls.class_image)
+  @ApiProperty()
+  classes: ClassEntity[];
+
+  constructor(data: Partial<ClassImageEntiy>) {
+    super();
+    Object.assign(this, data);
+  }
 }
