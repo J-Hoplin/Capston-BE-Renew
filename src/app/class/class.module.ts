@@ -4,7 +4,6 @@ import { ClassController } from './class.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClassEntity } from '@src/domain/class/class.entity';
 import { LoggerModule } from '@hoplin/nestjs-logger';
-import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
 import { InstructorModule } from '../instructor/instructor.module';
 import { DepartmentModule } from '../department/department.module';
 import { ClassImageModule } from '../class-image/class-image.module';

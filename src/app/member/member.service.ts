@@ -113,7 +113,6 @@ export class MemberService {
     await this.checkEmailTaken(body.email);
     // encrypt password
     body.password = await this.hashPassword(body.password);
-
     // Create new member with transaction
     const newMember = await this.dataSource.transaction(
       async (entitymanager: EntityManager) => {
@@ -128,14 +127,17 @@ export class MemberService {
 
         // Set member approval
         newMember.approvedReason = 'New Member';
+        const dept = await this.departmentRepository.findOneBy({
+          id: departmentId,
+        });
         // If role is instructor
         if (body.memberRole === member.Role.INSTRUCTOR) {
           // Set Pending - for admin check if it's instructor
           newMember.approved = member.Approve.PENDING;
           // Generate Instructor entity
           const newInstructor = new InstructorEntity({
-            id: newMember.id,
-            department: departmentId,
+            groupId: body.groupId,
+            department: dept,
           });
           // Set Instructor Profile
           newMember.instructorProfile = newInstructor;
@@ -146,8 +148,8 @@ export class MemberService {
           newMember.approved = member.Approve.APPROVE;
           // Generate Student Entity
           const newStudent = new StudentEntity({
-            id: newMember.id,
-            department: departmentId,
+            groupId: body.groupId,
+            department: dept,
           });
           // Set student profile
           newMember.studentProfile = newStudent;
@@ -155,6 +157,7 @@ export class MemberService {
         return await memberRepository.save(newMember);
       },
     );
+    console.log(newMember);
     return newMember;
   }
 
@@ -292,6 +295,11 @@ export class MemberService {
         memberRole: member.Role.STUDENT,
         id,
       },
+      relations: {
+        studentProfile: {
+          department: true,
+        },
+      },
     });
     return this.memberValidate(findMember);
   }
@@ -301,6 +309,11 @@ export class MemberService {
       where: {
         memberRole: member.Role.INSTRUCTOR,
         id,
+      },
+      relations: {
+        instructorProfile: {
+          department: true,
+        },
       },
     });
     return this.memberValidate(findMember);

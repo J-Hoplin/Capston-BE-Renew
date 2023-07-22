@@ -5,7 +5,6 @@ import { InstructorModule } from '../instructor/instructor.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClassImageEntiy } from '@src/domain/class-image/classimage.entity';
 import { LoggerModule } from '@hoplin/nestjs-logger';
-import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
 import { MemberModule } from '../member/member.module';
 
 @Module({

@@ -11,11 +11,6 @@ export class CreateClassDto implements Partial<ClassEntity> {
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  divisionNumber: number;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
   maximum_student: number;
 
   @ApiProperty()

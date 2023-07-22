@@ -4,6 +4,7 @@ import {
   Entity,
   OneToMany,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
 } from 'typeorm';
 import { StudentEntity } from '@domain/student/student.entity';
@@ -56,11 +57,11 @@ export class DepartmentEntity extends CommonEntity {
 
   @OneToMany(() => StudentEntity, (student) => student.department)
   @ApiProperty()
-  students: StudentEntity[];
+  students: Relation<StudentEntity>[];
 
   @OneToMany(() => InstructorEntity, (instructor) => instructor.department)
   @ApiProperty()
-  instructors: InstructorEntity[];
+  instructors: Relation<InstructorEntity>[];
 
   constructor(data: Partial<DepartmentEntity>) {
     super();

@@ -18,10 +18,15 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('instructor')
 export class InstructorEntity {
-  @PrimaryColumn() // Should be member.groupId
+  @PrimaryGeneratedColumn() // Should be member.groupId
   @ApiProperty()
   id: number;
 
+  @Column({
+    type: String,
+  })
+  @ApiProperty()
+  groupId: string;
   /**
    * Circular Dependency Issue
    * https://github.com/typeorm/typeorm/issues/4526
@@ -34,7 +39,7 @@ export class InstructorEntity {
     name: 'department_id',
   })
   @ApiProperty()
-  department: number;
+  department: Relation<DepartmentEntity>;
 
   constructor(data: Partial<InstructorEntity>) {
     Object.assign(this, data);

@@ -26,7 +26,7 @@ export class InstructorService {
       throw new MemberNotFound();
     }
     const findDepartment = await this.departmentService.getDepartmentById(
-      result.department,
+      result.department.id,
       false,
     );
     return findDepartment;

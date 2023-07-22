@@ -124,7 +124,6 @@ export class AuthenticationService {
 
     // Refresh token TTL : 1 Week
     // Enroll refresh token
-    console.log('here');
     await this.cacheService.set(
       this.getRefreshTokenKeyPreset(findMember),
       refreshToken,
@@ -216,7 +215,6 @@ export class AuthenticationService {
 
   // For Email Confirm
   private async generateEmailConfirmToken(user_id: number): Promise<string> {
-    console.log(this.jwtConf.emailConfirm.subject);
     return this.jwtService.signAsync(
       {
         user_id,

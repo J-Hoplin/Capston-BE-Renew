@@ -23,6 +23,13 @@ export class MemberEntity extends CommonEntity {
     nullable: false,
   })
   @ApiProperty()
+  name: string;
+
+  @Column({
+    type: String,
+    nullable: false,
+  })
+  @ApiProperty()
   password: string;
 
   @Column({

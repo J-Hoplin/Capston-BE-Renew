@@ -1,6 +1,14 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { StudentEntity } from '@domain/student/student.entity';
 import { ClassEntity } from '@domain/class/class.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('student_class')
 export class ClassStudentEntity {
@@ -9,20 +17,18 @@ export class ClassStudentEntity {
 
   @ManyToOne(() => StudentEntity, (student) => student.classstudent)
   @JoinColumn({
-    name: 'student_id',
+    name: 'student_gid',
   })
-  students: StudentEntity;
+  students: string;
 
-  @ManyToOne(() => ClassEntity, (cls) => cls.classstudent)
+  @ManyToOne(() => ClassEntity, (cls) => cls.classtudent)
   @JoinColumn([
     {
       name: 'class_name',
-      referencedColumnName: 'name',
-    },
-    {
-      name: 'division_number',
-      referencedColumnName: 'divisionNumber',
     },
   ])
-  classes: ClassEntity;
+  classes: number;
+  constructor(data: Partial<ClassStudentEntity>) {
+    Object.assign(this, data);
+  }
 }

@@ -8,7 +8,7 @@ export abstract class CommonEntity {
 
   @Column({
     type: String,
-    nullable: false,
+    nullable: true,
   })
   @ApiProperty()
   name: string;

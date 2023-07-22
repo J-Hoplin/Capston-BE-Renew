@@ -14,13 +14,22 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { CreateClassDto } from './dto/create-class.dto';
 import { ClassEntity } from '@src/domain/class/class.entity';
 import { CLASS_EXCEPTION_MSG } from '@src/infrastructure/exceptions/class';
-import { MEMBER_EXCEPTION_MSG } from '@src/infrastructure/exceptions';
+import {
+  AUTH_EXCEPTION_MSG,
+  DEPARTMENT_EXCEPTION_MSG,
+  MEMBER_EXCEPTION_MSG,
+} from '@src/infrastructure/exceptions';
 import { CLASS_IMAGE_EXCEPTION_MSG } from '@src/infrastructure/exceptions/class-image';
+import { UpdateClassDto } from './dto/update-class.dto';
+import { DeleteClassDto } from './dto/delete-class.dto';
+import { CommonResponseDto } from '@src/infrastructure/common/common.response.dto';
+import { EnrollClassDto } from './dto/enroll-class.dto';
 
 @ApiTags('Class')
 @Controller('class')
@@ -68,23 +77,6 @@ export class ClassController {
     return await this.classService.getClassByName(name);
   }
 
-  @Get('/name/:name/division/:division')
-  @ApiOperation({
-    summary: '이름과 분반을 통해 조회합니다.',
-  })
-  @ApiOkResponse({
-    type: ClassEntity,
-  })
-  @ApiBadRequestResponse({
-    description: CLASS_EXCEPTION_MSG.ClassNotFound,
-  })
-  public async getClassByNameAndDivision(
-    @Param('name') name: string,
-    @Param('division', ParseIntPipe) division: number,
-  ) {
-    return await this.classService.getClassByNameAndDivision(name, division);
-  }
-
   @Get('/instructor/:id')
   @ApiOperation({
     summary: '강사의 수업들을 나열합니다. 강사의 ID(Member.id)가 요구됩니다.',
@@ -97,7 +89,60 @@ export class ClassController {
     description: CLASS_EXCEPTION_MSG.ClassNotFound,
   })
   public async getClassByInstructor(@Param('id', ParseIntPipe) id: number) {
-    return await this.getClassByInstructor(id);
+    return await this.classService.getClassByInstructor(id);
+  }
+
+  @Get('/name/:name/instructor/:id')
+  @ApiOperation({
+    summary: '강사와 수업 이름을 통해 검색합니다',
+  })
+  @ApiBadRequestResponse({
+    description: [CLASS_EXCEPTION_MSG.ClassNotFound].join(', '),
+  })
+  public async getClassByInstructorAndName(
+    @Param('name') name: string,
+    @Param('id', ParseIntPipe) instructorId: number,
+  ) {
+    return await this.classService.getClassByInstructorAndName(
+      name,
+      instructorId,
+    );
+  }
+
+  @Get('/department/:id')
+  @ApiOperation({
+    summary: '부서 담당 수업을 검색합니다.',
+  })
+  @ApiOkResponse({
+    type: ClassEntity,
+    isArray: true,
+  })
+  @ApiBadRequestResponse({
+    description: [DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound].join(', '),
+  })
+  public async getClassByDepartment(@Param('id') id: number) {
+    return await this.classService.getClassByDepartment(id);
+  }
+
+  @Get('/available/:id')
+  @ApiOperation({
+    summary: '학생이 수강 가능한 수업 목록들을 불러옵니다.',
+  })
+  @ApiOkResponse({
+    type: ClassEntity,
+    isArray: true,
+  })
+  @ApiBadRequestResponse({
+    description: [MEMBER_EXCEPTION_MSG.MemberNotFound].join(', '),
+  })
+  @ApiUnauthorizedResponse({
+    description: [AUTH_EXCEPTION_MSG.InvalidMemberApproval].join(', '),
+  })
+  @ApiUnprocessableEntityResponse({
+    description: [AUTH_EXCEPTION_MSG.EmailYetConfirmed].join(', '),
+  })
+  public async getAvailableClasses(@Param('id') id: number) {
+    return await this.classService.getAvailableClasses(id);
   }
 
   @Post()
@@ -106,7 +151,6 @@ export class ClassController {
   })
   @ApiOkResponse({
     type: ClassEntity,
-    isArray: true,
   })
   @ApiBadRequestResponse({
     description: [
@@ -114,23 +158,65 @@ export class ClassController {
       CLASS_IMAGE_EXCEPTION_MSG.ImageNotFound,
     ].join(', '),
   })
+  @ApiUnauthorizedResponse({
+    description: [AUTH_EXCEPTION_MSG.InvalidMemberApproval].join(', '),
+  })
   @ApiUnprocessableEntityResponse({
     description: [
       CLASS_IMAGE_EXCEPTION_MSG.ImageYetPending,
       CLASS_IMAGE_EXCEPTION_MSG.ImageBuildFailed,
+      AUTH_EXCEPTION_MSG.EmailYetConfirmed,
     ].join(','),
   })
   public async createNewClass(@Body() body: CreateClassDto) {
     return await this.classService.createNewClass(body);
   }
 
+  @Post('/enroll')
+  @ApiOkResponse({
+    type: CommonResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: [
+      MEMBER_EXCEPTION_MSG.MemberNotFound,
+      CLASS_EXCEPTION_MSG.ClassNotFound,
+      CLASS_EXCEPTION_MSG.StudentCountExceed,
+    ].join(', '),
+  })
+  public async enrollClass(@Body() body: EnrollClassDto) {
+    const result = await this.classService.enrollClass(body);
+    return new CommonResponseDto(result);
+  }
+
   @Patch()
-  public async updateClass() {
-    return await this.classService.updateClass();
+  @ApiOperation({
+    summary: '수업 정보를 수정합니다.',
+  })
+  @ApiOkResponse({
+    type: ClassEntity,
+  })
+  @ApiBadRequestResponse({
+    description: [
+      CLASS_EXCEPTION_MSG.ClassNotFound,
+      CLASS_EXCEPTION_MSG.CantUpdateToLowerBound,
+    ].join(', '),
+  })
+  public async updateClass(@Body() body: UpdateClassDto) {
+    return await this.classService.updateClass(body);
   }
 
   @Delete()
-  public async deleteClass() {
-    return await this.classService.deleteClass();
+  @ApiOperation({
+    summary: '수업을 삭제합니다.',
+  })
+  @ApiOkResponse({
+    type: CommonResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: [CLASS_EXCEPTION_MSG.ClassNotFound].join(', '),
+  })
+  public async deleteClass(@Body() body: DeleteClassDto) {
+    const result = await this.classService.deleteClass(body);
+    return new CommonResponseDto(result);
   }
 }

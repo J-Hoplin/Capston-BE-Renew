@@ -11,7 +11,9 @@ import defaultConfig from '@src/config/config/default.config';
 import { DataSource } from 'typeorm';
 import {
   EmailAlreadyTaken,
+  EmailYetConfirmed,
   GroupIDAlreadyTaken,
+  InvalidMemberApproval,
   MemberNotFound,
   PasswordUnmatched,
 } from '@src/infrastructure/exceptions';
@@ -398,6 +400,61 @@ describe('MemberService', () => {
       expect(studentResult.approvedReason).toBe('test');
       expect(instructorResult.approved).toBe(member.Approve.APPROVE);
       expect(instructorResult.approvedReason).toBe('test');
+    });
+  });
+
+  describe('It check student/instructor approved', () => {
+    it('Should return student not found', async () => {
+      // Given : Give instructor id
+      const id = memberInstructor.id;
+      try {
+        // When
+        await service.checkApprovedStudent(id);
+      } catch (err) {
+        // Then
+        expect(err).toBeInstanceOf(MemberNotFound);
+      }
+    });
+
+    it('Should return Invalid member approval exception', async () => {
+      //Given
+      const id = memberStudent.id;
+      try {
+        // When
+        await service.checkApprovedStudent(id);
+      } catch (err) {
+        // Then
+        expect(err).toBeInstanceOf(InvalidMemberApproval);
+      }
+    });
+
+    it('Should return Email not confirmed exception', async () => {
+      // Given
+      // Change member approval
+      await service.updateMemberApproval({
+        id: memberStudent.id,
+        approved: member.Approve.APPROVE,
+        approvedReason: 'test',
+      });
+      memberStudent = await service.getMemberById(memberStudent.id);
+      const id = memberStudent.id;
+      try {
+        // When
+        await service.checkApprovedStudent(id);
+      } catch (err) {
+        // Then
+        expect(err).toBeInstanceOf(EmailYetConfirmed);
+      }
+    });
+
+    it('Should return member entiity', async () => {
+      // Given
+      const repository = dataSource.getRepository(MemberEntity);
+      memberStudent.emailConfirmed = true;
+      await repository.save(memberStudent);
+      const result = await service.checkApprovedStudent(memberStudent.id);
+      expect(result).toBeInstanceOf(MemberEntity);
+      expect(result.id).toBe(memberStudent.id);
     });
   });
 

@@ -16,14 +16,15 @@ import { ClassStudentEntity } from '@domain/class_student/class-student.entity';
 import { ClassImageEntiy } from '../class-image/classimage.entity';
 
 @Entity('class')
-@Unique('class_division', ['name', 'divisionNumber'])
+@Unique('instructor_class', ['name', 'instructorId'])
 export class ClassEntity extends CommonEntity {
   @Column({
-    type: Number,
+    type: String,
     nullable: false,
+    unique: true,
   })
   @ApiProperty()
-  divisionNumber: number;
+  name: string;
 
   @Column({
     type: Number,
@@ -38,6 +39,13 @@ export class ClassEntity extends CommonEntity {
   })
   @ApiProperty()
   instructorId: number;
+
+  @Column({
+    type: String,
+    nullable: false,
+  })
+  @ApiProperty()
+  departmentId: number;
 
   @Column({
     type: 'enum',
@@ -57,8 +65,10 @@ export class ClassEntity extends CommonEntity {
   class_image: number;
 
   @ApiProperty()
-  @OneToMany(() => ClassStudentEntity, (cs) => cs.classes)
-  classstudent: ClassStudentEntity[];
+  @OneToMany(() => ClassStudentEntity, (cs) => cs.classes, {
+    cascade: true,
+  })
+  classtudent: ClassStudentEntity[];
 
   constructor(data: Partial<ClassEntity>) {
     super();
