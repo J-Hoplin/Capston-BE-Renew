@@ -4,6 +4,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Relation,
   Unique,
 } from 'typeorm';
 import { StudentEntity } from '@domain/student/student.entity';
@@ -19,7 +20,7 @@ export class ClassStudentEntity {
   @JoinColumn({
     name: 'student_gid',
   })
-  students: string;
+  students: Relation<StudentEntity>;
 
   @ManyToOne(() => ClassEntity, (cls) => cls.classtudent)
   @JoinColumn([
@@ -27,7 +28,7 @@ export class ClassStudentEntity {
       name: 'class_name',
     },
   ])
-  classes: number;
+  classes: Relation<ClassEntity>;
   constructor(data: Partial<ClassStudentEntity>) {
     Object.assign(this, data);
   }

@@ -5,6 +5,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  Relation,
   Unique,
 } from 'typeorm';
 import { CommonEntity } from '../common.abstract';
@@ -62,7 +63,7 @@ export class ClassEntity extends CommonEntity {
   @JoinColumn({
     name: 'class_container_image_id',
   })
-  class_image: number;
+  class_image: Relation<ClassImageEntiy>;
 
   @ApiProperty()
   @OneToMany(() => ClassStudentEntity, (cs) => cs.classes, {

@@ -23,7 +23,6 @@ export class DepartmentService {
   ) {}
 
   public async getAllDepartments(detail: boolean): Promise<DepartmentEntity[]> {
-    console.log(detail);
     const result = await this.departmentRepository.find({
       relations: {
         students: detail,

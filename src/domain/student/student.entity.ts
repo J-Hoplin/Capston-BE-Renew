@@ -40,7 +40,7 @@ export class StudentEntity {
   department: Relation<DepartmentEntity>;
 
   @OneToMany(() => ClassStudentEntity, (cs) => cs.students)
-  classstudent: ClassStudentEntity[];
+  classstudent: Relation<ClassStudentEntity>[];
 
   constructor(data: Partial<StudentEntity>) {
     Object.assign(this, data);

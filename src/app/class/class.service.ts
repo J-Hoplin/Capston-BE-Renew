@@ -133,7 +133,7 @@ export class ClassService {
     )
       .map((x) => x.classtudent)
       .flat()
-      .map((x) => x.classes);
+      .map((x) => x.classes.id);
 
     // Filter student listening classes from department classes
     const substraction = filteredClassIds.filter(
@@ -159,8 +159,8 @@ export class ClassService {
       throw new StudentCountExceed();
     }
     const newStudentClass = new ClassStudentEntity({
-      students: student.groupId,
-      classes: findClass.id,
+      students: student.studentProfile,
+      classes: findClass,
     });
     const result = await this.dataSource.transaction(
       async (manager: EntityManager) => {
@@ -195,8 +195,6 @@ export class ClassService {
         }
       }
     }
-
-    console.log(instructor);
 
     const newClass = await this.dataSource.transaction(
       async (manager: EntityManager) => {

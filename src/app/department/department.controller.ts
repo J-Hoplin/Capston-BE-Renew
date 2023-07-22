@@ -14,6 +14,7 @@ import {
   ParseFilePipeBuilder,
   HttpStatus,
   UnprocessableEntityException,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import { DepartmentEntity } from '@src/domain/department/department.entity';
 import { DepartmentService } from './department.service';
@@ -48,7 +49,8 @@ export class DepartmentController {
     isArray: true,
   })
   public async getAllDepartments(
-    @Query('detail', new DefaultValuePipe(false)) detail?: boolean,
+    @Query('detail', new DefaultValuePipe(false), ParseBoolPipe)
+    detail?: boolean,
   ): Promise<DepartmentEntity[]> {
     return await this.departmentService.getAllDepartments(detail);
   }

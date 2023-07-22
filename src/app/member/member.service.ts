@@ -157,7 +157,6 @@ export class MemberService {
         return await memberRepository.save(newMember);
       },
     );
-    console.log(newMember);
     return newMember;
   }
 
