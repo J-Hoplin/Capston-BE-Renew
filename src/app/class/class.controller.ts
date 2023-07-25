@@ -173,6 +173,9 @@ export class ClassController {
   }
 
   @Post('/enroll')
+  @ApiOperation({
+    summary: '학생이 수업을 등록합니다.',
+  })
   @ApiOkResponse({
     type: CommonResponseDto,
   })
