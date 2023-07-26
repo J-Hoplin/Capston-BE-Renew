@@ -1,3 +1,4 @@
+import { ClassImageEntiy } from '@src/domain/class-image/classimage.entity';
 import { DepartmentEntity } from '@src/domain/department/department.entity';
 import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
 import { MemberEntity } from '@src/domain/member/member.entity';

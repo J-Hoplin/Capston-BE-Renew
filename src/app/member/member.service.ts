@@ -130,31 +130,34 @@ export class MemberService {
         const dept = await this.departmentRepository.findOneBy({
           id: departmentId,
         });
+        const memberSaved = await memberRepository.save(newMember);
         // If role is instructor
         if (body.memberRole === member.Role.INSTRUCTOR) {
           // Set Pending - for admin check if it's instructor
-          newMember.approved = member.Approve.PENDING;
+          memberSaved.approved = member.Approve.PENDING;
           // Generate Instructor entity
           const newInstructor = new InstructorEntity({
+            id: memberSaved.id,
             groupId: body.groupId,
             department: dept,
           });
           // Set Instructor Profile
-          newMember.instructorProfile = newInstructor;
+          memberSaved.instructorProfile = newInstructor;
         }
         // Role is student
         else {
           // Set Approved
-          newMember.approved = member.Approve.APPROVE;
+          memberSaved.approved = member.Approve.APPROVE;
           // Generate Student Entity
           const newStudent = new StudentEntity({
+            id: memberSaved.id,
             groupId: body.groupId,
             department: dept,
           });
           // Set student profile
-          newMember.studentProfile = newStudent;
+          memberSaved.studentProfile = newStudent;
         }
-        return await memberRepository.save(newMember);
+        return await memberRepository.save(memberSaved);
       },
     );
     return newMember;

@@ -8,13 +8,26 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  PrimaryGeneratedColumn,
+  Relation,
   UpdateDateColumn,
 } from 'typeorm';
 import { ClassEntity } from '../class/class.entity';
 import { classImg } from '@src/infrastructure/types';
 
 @Entity('class-image')
-export class ClassImageEntiy extends CommonEntity {
+export class ClassImageEntiy {
+  @PrimaryGeneratedColumn()
+  @ApiProperty()
+  id: number;
+
+  @Column({
+    type: String,
+    nullable: true,
+  })
+  @ApiProperty()
+  name: string;
+
   @Column({
     type: String,
     nullable: true,
@@ -40,19 +53,20 @@ export class ClassImageEntiy extends CommonEntity {
   @ApiProperty()
   createdAt: Date;
 
-  @ApiProperty()
-  @Column({
-    type: String,
-    nullable: false,
-  })
-  instructor_id: number;
-
   @OneToMany(() => ClassEntity, (cls) => cls.class_image)
   @ApiProperty()
   classes: ClassEntity[];
 
+  @ManyToOne(() => InstructorEntity, (ins) => ins.images, {
+    cascade: true,
+  })
+  @JoinColumn({
+    name: 'instructor_id',
+  })
+  @ApiProperty()
+  instructor: Relation<InstructorEntity>;
+
   constructor(data: Partial<ClassImageEntiy>) {
-    super();
     Object.assign(this, data);
   }
 }

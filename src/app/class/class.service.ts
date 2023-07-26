@@ -4,7 +4,9 @@ import { ClassEntity } from '@src/domain/class/class.entity';
 import {
   CantUpdateToLowerBound,
   ClassNotFound,
+  DuplicatedClassNameFound,
   StudentCountExceed,
+  UnavailableToEnroll,
 } from '@src/infrastructure/exceptions/class';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { CreateClassDto } from './dto/create-class.dto';
@@ -36,6 +38,7 @@ export class ClassService {
     private readonly classImageService: ClassImageService,
     private readonly memberService: MemberService,
     private readonly departmentService: DepartmentService,
+    private readonly instructorService: InstructorService,
     private readonly dataSource: DataSource,
     private readonly logger: Logger,
   ) {}
@@ -72,22 +75,27 @@ export class ClassService {
   }
 
   public async getClassByInstructor(id: number) {
+    // Check instructor exist
+    await this.instructorService.getInstructorById(id);
     const result = await this.classRepository.find({
       where: {
-        id,
+        instructor: {
+          id,
+        },
       },
     });
-    if (!result.length) {
-      throw new ClassNotFound();
-    }
     return result;
   }
 
   public async getClassByInstructorAndName(name: string, instructorId: number) {
+    // Check instructor exist
+    await this.instructorService.getInstructorById(instructorId);
     const result = await this.classRepository.findOne({
       where: {
         name,
-        instructorId,
+        instructor: {
+          id: instructorId,
+        },
       },
     });
     if (!result) {
@@ -101,9 +109,6 @@ export class ClassService {
       id,
       false,
     );
-    if (!department) {
-      throw new DepartmentNotFound();
-    }
     const findClasses = await this.classRepository.find({
       where: {
         departmentId: id,
@@ -152,6 +157,14 @@ export class ClassService {
     //Check class exist
     const findClass = await this.getClassById(body.classId);
 
+    // Check if it's available class
+    const checkAvailableClass = (await this.getAvailableClasses(body.studentId))
+      .map((x) => x.id)
+      .some((x) => x === body.classId);
+
+    if (!checkAvailableClass) {
+      throw new UnavailableToEnroll();
+    }
     // Check class's student count
     const studentCount = findClass.classtudent.length;
     // Exception when exceeded
@@ -182,27 +195,34 @@ export class ClassService {
     const envImage = await this.classImageService.getClassImageById(
       body.classImageId,
     );
-    if (!envImage) {
-      throw new ImageNotFound();
-    } else {
-      // If image status is not pending
-      if (envImage.status !== classImg.status.SUCCESS) {
-        switch (envImage.status) {
-          case classImg.status.PENDING:
-            throw new ImageYetPending();
-          default:
-            throw new ImageBuildFailed();
-        }
+    // If image status is not pending
+    if (envImage.status !== classImg.status.SUCCESS) {
+      switch (envImage.status) {
+        case classImg.status.PENDING:
+          throw new ImageYetPending();
+        default:
+          throw new ImageBuildFailed();
       }
     }
-
+    // Check instructor already enrolled class with same name
+    const instructorClasses = (
+      await this.getClassByInstructor(body.instructorId)
+    ).map((x) => {
+      return x.name;
+    });
+    if (instructorClasses.includes(body.name)) {
+      throw new DuplicatedClassNameFound();
+    }
     const newClass = await this.dataSource.transaction(
       async (manager: EntityManager) => {
         // Get Repository
         const repository = manager.getRepository(ClassEntity);
         // New Class Entity
         const newClass = new ClassEntity(body);
+
         newClass.departmentId = instructor.instructorProfile.department.id;
+        newClass.instructor = instructor.instructorProfile;
+        newClass.class_image = envImage;
 
         const saveClass = await repository.save(newClass);
         this.logger.log(`New class saved : ${body.name}`);

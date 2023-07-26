@@ -5,6 +5,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  PrimaryGeneratedColumn,
   Relation,
   Unique,
 } from 'typeorm';
@@ -17,8 +18,12 @@ import { ClassStudentEntity } from '@domain/class_student/class-student.entity';
 import { ClassImageEntiy } from '../class-image/classimage.entity';
 
 @Entity('class')
-@Unique('instructor_class', ['name', 'instructorId'])
-export class ClassEntity extends CommonEntity {
+@Unique('instructor_class', ['name', 'instructor'])
+export class ClassEntity {
+  @PrimaryGeneratedColumn()
+  @ApiProperty()
+  id: number;
+
   @Column({
     type: String,
     nullable: false,
@@ -33,13 +38,6 @@ export class ClassEntity extends CommonEntity {
   })
   @ApiProperty()
   maximum_student: number;
-
-  @Column({
-    type: String,
-    nullable: false,
-  })
-  @ApiProperty()
-  instructorId: number;
 
   @Column({
     type: String,
@@ -71,8 +69,16 @@ export class ClassEntity extends CommonEntity {
   })
   classtudent: ClassStudentEntity[];
 
+  @ManyToOne(() => InstructorEntity, (instructor) => instructor.classes, {
+    cascade: true,
+  })
+  @JoinColumn({
+    name: 'instructor_id',
+  })
+  @ApiProperty()
+  instructor: Relation<InstructorEntity>;
+
   constructor(data: Partial<ClassEntity>) {
-    super();
     Object.assign(this, data);
   }
 }

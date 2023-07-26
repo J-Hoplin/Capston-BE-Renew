@@ -33,8 +33,21 @@ export class InstructorService {
   }
 
   public async getInstructorById(id: number) {
-    const result = await this.instructorRepository.findOneBy({
-      id,
+    const result = await this.instructorRepository.findOne({
+      where: {
+        id,
+      },
+    });
+    if (!result) {
+      throw new MemberNotFound();
+    }
+    return result;
+  }
+  public async getInstructorByGid(gid: string) {
+    const result = await this.instructorRepository.findOne({
+      where: {
+        groupId: gid,
+      },
     });
     if (!result) {
       throw new MemberNotFound();

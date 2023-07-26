@@ -155,6 +155,7 @@ export class ClassController {
   @ApiBadRequestResponse({
     description: [
       MEMBER_EXCEPTION_MSG.MemberNotFound,
+      CLASS_EXCEPTION_MSG.DuplicatedClassNameFound,
       CLASS_IMAGE_EXCEPTION_MSG.ImageNotFound,
     ].join(', '),
   })
@@ -184,6 +185,7 @@ export class ClassController {
       MEMBER_EXCEPTION_MSG.MemberNotFound,
       CLASS_EXCEPTION_MSG.ClassNotFound,
       CLASS_EXCEPTION_MSG.StudentCountExceed,
+      CLASS_EXCEPTION_MSG.UnavailableToEnroll,
     ].join(', '),
   })
   public async enrollClass(@Body() body: EnrollClassDto) {

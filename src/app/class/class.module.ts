@@ -16,6 +16,7 @@ import { MemberModule } from '../member/member.module';
     MemberModule,
     DepartmentModule,
     ClassImageModule,
+    InstructorModule,
   ],
   providers: [ClassService],
   controllers: [ClassController],

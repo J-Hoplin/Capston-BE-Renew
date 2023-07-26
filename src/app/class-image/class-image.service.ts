@@ -55,10 +55,14 @@ export class ClassImageService {
       async (manager: EntityManager) => {
         // Get Repository
         const imageRepository = manager.getRepository(ClassImageEntiy);
+        // Get instructor
+        const instructor = await this.memberService.checkApprovedInstructor(
+          body.instructor_id,
+        );
         // New class image entity
         const newImage = new ClassImageEntiy({
           name: body.name,
-          instructor_id: body.instructor_id,
+          instructor: instructor.instructorProfile,
         });
 
         const saveImage = await imageRepository.save(newImage);

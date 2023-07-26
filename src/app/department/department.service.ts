@@ -45,6 +45,9 @@ export class DepartmentService {
         instructors: detail,
       },
     });
+    if (!result) {
+      throw new DepartmentNotFound();
+    }
     return result;
   }
 

@@ -18,7 +18,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('instructor')
 export class InstructorEntity {
-  @PrimaryGeneratedColumn() // Should be member.groupId
+  @PrimaryColumn() // Should be member.groupId
   @ApiProperty()
   id: number;
 
@@ -40,6 +40,14 @@ export class InstructorEntity {
   })
   @ApiProperty()
   department: Relation<DepartmentEntity>;
+
+  @OneToMany(() => ClassEntity, (cls) => cls.instructor)
+  @ApiProperty()
+  classes: Relation<ClassEntity>[];
+
+  @OneToMany(() => ClassImageEntiy, (ci) => ci.instructor)
+  @ApiProperty()
+  images: Relation<ClassImageEntiy>[];
 
   constructor(data: Partial<InstructorEntity>) {
     Object.assign(this, data);
