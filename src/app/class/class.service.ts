@@ -54,6 +54,7 @@ export class ClassService {
         id,
       },
       relations: {
+        instructor: true,
         classtudent: true,
       },
     });
@@ -187,6 +188,9 @@ export class ClassService {
         return true;
       },
     );
+    this.logger.log(
+      `Student ${student.groupId}(${student.name}) enroll new class : `,
+    );
     return true;
   }
 
@@ -259,6 +263,9 @@ export class ClassService {
       const repository = manager.getRepository(ClassEntity);
       await repository.save(findClass);
     });
+    this.logger.log(
+      `Class info updated : ${findClass.name}(Instructor ID : ${findClass.instructor.id})`,
+    );
     return findClass;
   }
 
@@ -270,6 +277,9 @@ export class ClassService {
       const repository = manager.getRepository(ClassEntity);
       await repository.remove(findClass);
     });
+    this.logger.log(
+      `Class removed : ${findClass.name}(Instructor ID : ${findClass.instructor.id})`,
+    );
     return true;
   }
 }

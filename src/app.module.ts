@@ -14,6 +14,7 @@ import { DepartmentModule } from './app/department/department.module';
 import { ClassImageModule } from './app/class-image/class-image.module';
 import { InstructorModule } from './app/instructor/instructor.module';
 import { ClassModule } from './app/class/class.module';
+import { StudentModule } from './app/student/student.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ClassModule } from './app/class/class.module';
     ClassImageModule,
     InstructorModule,
     ClassModule,
+    StudentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

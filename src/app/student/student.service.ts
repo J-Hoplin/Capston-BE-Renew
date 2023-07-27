@@ -1,25 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
+import { StudentEntity } from '@src/domain/student/student.entity';
 import { MemberNotFound } from '@src/infrastructure/exceptions';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class InstructorService {
+export class StudentService {
   constructor(
-    @InjectRepository(InstructorEntity)
-    private readonly instructorRepository: Repository<InstructorEntity>,
+    @InjectRepository(StudentEntity)
+    private readonly studentRepository: Repository<StudentEntity>,
   ) {}
 
-  public async getInstructorById(id: number) {
-    const result = await this.instructorRepository.findOne({
+  public async getStudentById(id: number) {
+    const result = await this.studentRepository.findOne({
       where: {
         id,
       },
       relations: {
         department: true,
-        classes: true,
-        images: true,
+        classstudent: true,
       },
     });
     if (!result) {
@@ -27,15 +26,15 @@ export class InstructorService {
     }
     return result;
   }
-  public async getInstructorByGid(gid: string) {
-    const result = await this.instructorRepository.findOne({
+
+  public async getStudentByGid(gid: string) {
+    const result = await this.studentRepository.findOne({
       where: {
         groupId: gid,
       },
       relations: {
         department: true,
-        classes: true,
-        images: true,
+        classstudent: true,
       },
     });
     if (!result) {

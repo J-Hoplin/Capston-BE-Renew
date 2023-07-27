@@ -35,8 +35,8 @@ describe('AuthController', () => {
     service = module.get<AuthenticationService>(AuthenticationService);
   });
 
-  describe('Login Controller', () => {
-    it("Should call it's service once", async () => {
+  describe("Should call it's service once", () => {
+    it('login', async () => {
       const spy = jest.spyOn(service, 'login');
       //Given
       const mockDto: LoginRequestDto = {
@@ -44,84 +44,28 @@ describe('AuthController', () => {
         password: 'password',
       };
       // When
-      await service.login(mockDto);
+      await controller.login(mockDto);
       // Then
       expect(spy).toBeCalledTimes(1);
     });
 
-    it('Should return exception for wrong type of dto field', async () => {
-      const spy = jest.spyOn(service, 'login');
-      // Given
-      //Given
-
-      // Wront type of email format
-      const mockDto: LoginRequestDto = {
-        email: 'jhoplin',
-        password: 'password',
-      };
-
-      // When
-      try {
-        await service.login(mockDto);
-      } catch (err) {
-        // Then
-        expect(err).toBeInstanceOf(HttpException);
-      }
-    });
-  });
-
-  describe('Refresh Controller', () => {
-    it("Should call it's service once", async () => {
+    it('refresh', async () => {
       const spy = jest.spyOn(service, 'refresh');
-
-      // Given
-      const mockRequest = {};
-
       // When
-      await service.refresh(mockRequest as Request);
-      // Then
+      await controller.refresh({} as Request);
       expect(spy).toBeCalledTimes(1);
     });
-  });
 
-  describe('GET - checkEmailCode Controller', () => {
-    it("Should call it's service once", async () => {
+    it('check email', async () => {
       const spy = jest.spyOn(service, 'checkEmailCode');
-      // Given
-      const mockKey = 'test';
-
-      // When
-      await service.checkEmailCode(mockKey);
-
-      // Then
-      expect(spy).toBeCalledTimes(1);
-    });
-  });
-
-  describe('POST - sendEmailCode controller', () => {
-    it("Should call it's service once", async () => {
-      const spy = jest.spyOn(service, 'sendEmailCode');
-      // Given
-      const mockDto: SendEmailRequestDto = {
-        id: 1,
-      };
-      // When
-      await service.sendEmailCode(mockDto);
-
-      // Then
+      await controller.checkEmailCode('test');
       expect(spy).toBeCalledTimes(1);
     });
 
-    it('Should return HTTP Exception', async () => {
+    it('send email', async () => {
       const spy = jest.spyOn(service, 'sendEmailCode');
-      // Given
-      const mockDto = {};
-      // When
-      try {
-        await service.sendEmailCode(mockDto as SendEmailRequestDto);
-      } catch (err) {
-        expect(err).toBeInstanceOf(HttpException);
-      }
+      await controller.sendEmailCode({} as SendEmailRequestDto);
+      expect(spy).toBeCalledTimes(1);
     });
   });
 });

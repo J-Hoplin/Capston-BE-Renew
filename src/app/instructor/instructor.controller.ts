@@ -10,19 +10,34 @@ import { DepartmentEntity } from '@src/domain/department/department.entity';
 import { MEMBER_EXCEPTION_MSG } from '@src/infrastructure/exceptions';
 import { ClassEntity } from '@src/domain/class/class.entity';
 import { ClassImageEntiy } from '@src/domain/class-image/classimage.entity';
+import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
 
 @ApiTags('Instructor')
 @Controller('instructor')
 export class InstructorController {
   constructor(private readonly instructorService: InstructorService) {}
 
-  @Get('/:id/department')
+  @Get('/:id')
   @ApiOperation({
-    summary: '교직원의 소속 부서를 조회합니다. Id는 group id이어야 합니다',
+    description: 'Instructor를 ID를 통해 조회합니다.',
   })
-  @ApiOkResponse({ type: DepartmentEntity })
-  @ApiBadRequestResponse({ type: MEMBER_EXCEPTION_MSG.MemberNotFound })
-  public async getInstructorDepartment(@Param('id', ParseIntPipe) id: number) {
-    return await this.instructorService.getInstructorDepartment(id);
+  @ApiOkResponse({ type: InstructorEntity })
+  @ApiBadRequestResponse({
+    description: MEMBER_EXCEPTION_MSG.MemberNotFound,
+  })
+  public async getInstructorById(@Param('id', ParseIntPipe) id: number) {
+    return await this.instructorService.getInstructorById(id);
+  }
+
+  @Get('/gid/:gid')
+  @ApiOperation({
+    description: 'Instructor를 Group ID를 통해 조회합니다',
+  })
+  @ApiOkResponse({ type: InstructorEntity })
+  @ApiBadRequestResponse({
+    description: MEMBER_EXCEPTION_MSG.MemberNotFound,
+  })
+  public async getInstructorByGroupId(@Param('gid') id: string) {
+    return await this.instructorService.getInstructorByGid(id);
   }
 }

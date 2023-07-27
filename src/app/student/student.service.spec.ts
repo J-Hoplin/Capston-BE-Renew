@@ -1,29 +1,29 @@
-import { MemberEntity } from '@src/domain/member/member.entity';
 import { MySqlContainer, StartedMySqlContainer } from 'testcontainers';
+import { StudentService } from './student.service';
 import { DataSource, Repository } from 'typeorm';
-import { exampleInstructorEntity } from '../class/test';
-import { Test, TestingModule } from '@nestjs/testing';
-import { InstructorService } from './instructor.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
-import { MemberNotFound } from '@src/infrastructure/exceptions';
+import { MemberEntity } from '@src/domain/member/member.entity';
+import { exampleStudent1Entity } from '../class/test';
+import { StudentEntity } from '@src/domain/student/student.entity';
 import { DepartmentEntity } from '@src/domain/department/department.entity';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { MemberNotFound } from '@src/infrastructure/exceptions';
 
-describe('Instructor Service', () => {
+describe('Student Service', () => {
   jest.setTimeout(3000000);
 
-  let service: InstructorService;
+  let service: StudentService;
 
   // Database Container
   let container: StartedMySqlContainer;
-  // Datasource
+  //  Datasourse
   let dataSource: DataSource;
 
   // Example Repository
   let memberRepository: Repository<MemberEntity>;
 
   // Example Entities
-  let instructor: MemberEntity;
+  let student: MemberEntity;
 
   beforeAll(async () => {
     container = await new MySqlContainer().start();
@@ -39,26 +39,26 @@ describe('Instructor Service', () => {
     }).initialize();
     memberRepository = dataSource.getRepository(MemberEntity);
 
-    instructor = await memberRepository.save(exampleInstructorEntity);
-    instructor.instructorProfile = new InstructorEntity({
-      id: instructor.id,
-      groupId: exampleInstructorEntity.groupId,
+    student = await memberRepository.save(exampleStudent1Entity);
+    student.studentProfile = new StudentEntity({
+      id: student.id,
+      groupId: exampleStudent1Entity.groupId,
       department: {} as DepartmentEntity,
     });
-    instructor = await memberRepository.save(instructor);
+    student = await memberRepository.save(student);
   });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: getRepositoryToken(InstructorEntity),
-          useValue: dataSource.getRepository(InstructorEntity),
+          provide: getRepositoryToken(StudentEntity),
+          useValue: dataSource.getRepository(StudentEntity),
         },
-        InstructorService,
+        StudentService,
       ],
     }).compile();
-    service = module.get<InstructorService>(InstructorService);
+    service = module.get<StudentService>(StudentService);
   });
 
   afterEach(async () => {
@@ -75,9 +75,9 @@ describe('Instructor Service', () => {
   describe('Get by ID', () => {
     it('Should get member', async () => {
       //Given
-      const id = instructor.id;
+      const id = student.id;
       // When
-      const result = await service.getInstructorById(id);
+      const result = await service.getStudentById(id);
       // Then
       expect(result).not.toBeUndefined();
     });
@@ -87,20 +87,19 @@ describe('Instructor Service', () => {
       const id = 1000;
       // When
       try {
-        await service.getInstructorById(id);
+        await service.getStudentById(id);
       } catch (err) {
         // Then
         expect(err).toBeInstanceOf(MemberNotFound);
       }
     });
   });
-
   describe('Get by gid', () => {
     it('Should get member', async () => {
       //Given
-      const gid = instructor.groupId;
+      const gid = student.groupId;
       // When
-      const result = await service.getInstructorByGid(gid);
+      const result = await service.getStudentByGid(gid);
       // Then
       expect(result).not.toBeUndefined();
     });
@@ -110,7 +109,7 @@ describe('Instructor Service', () => {
       const gid = 'test';
       // When
       try {
-        await service.getInstructorByGid(gid);
+        await service.getStudentByGid(gid);
       } catch (err) {
         expect(err).toBeInstanceOf(MemberNotFound);
       }
