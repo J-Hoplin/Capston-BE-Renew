@@ -6,6 +6,7 @@ import {
   ClassNotFound,
   DuplicatedClassNameFound,
   StudentCountExceed,
+  StudentCountShouldBeUpperThanZero,
   UnavailableToEnroll,
 } from '@src/infrastructure/exceptions/class';
 import { DataSource, EntityManager, Repository } from 'typeorm';
@@ -125,6 +126,7 @@ export class ClassService {
     );
     // Filter only ids
     const filteredClassIds = filterDepartment.map((x) => x.id);
+
     // Filter student listening
     const filterStudentListening = (
       await this.classRepository.find({
@@ -132,13 +134,17 @@ export class ClassService {
           departmentId: student.studentProfile.department.id,
         },
         relations: {
-          classtudent: true,
+          classtudent: {
+            students: true,
+            classes: true,
+          },
         },
       })
     )
-      .map((x) => x.classtudent)
+      .map((x) => x.classtudent) // Map class - student entity
       .flat()
-      .map((x) => x.classes.id);
+      .filter((x) => x.students.id === id) // filter only student
+      .map((x) => x.classes.id); // return class ids
 
     // Filter student listening classes from department classes
     const substraction = filteredClassIds.filter(
@@ -156,7 +162,6 @@ export class ClassService {
     );
     //Check class exist
     const findClass = await this.getClassById(body.classId);
-
     // Check if it's available class
     const checkAvailableClass = (await this.getAvailableClasses(body.studentId))
       .map((x) => x.id)
@@ -213,6 +218,11 @@ export class ClassService {
     if (instructorClasses.includes(body.name)) {
       throw new DuplicatedClassNameFound();
     }
+
+    // Check maximum student count
+    if (body.maximum_student <= 0) {
+      throw new StudentCountShouldBeUpperThanZero();
+    }
     const newClass = await this.dataSource.transaction(
       async (manager: EntityManager) => {
         // Get Repository
@@ -258,7 +268,7 @@ export class ClassService {
     const findClass = await this.getClassById(id);
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const repository = manager.getRepository(ClassEntity);
-      await repository.delete(findClass);
+      await repository.remove(findClass);
     });
     return true;
   }

@@ -12,9 +12,13 @@ import { DepartmentEntity } from '@src/domain/department/department.entity';
 import { MemberEntity } from '@src/domain/member/member.entity';
 import {
   exampleDepartmentEntity,
+  exampleDepartmentEntity2,
+  exampleDepartmentEntity3,
   exampleInstructorEntity,
+  exampleInstructorEntity2,
   exampleStudent1Entity,
   exampleStudent2Entity,
+  exampleStudent3Entity,
 } from './test';
 import { InstructorEntity } from '@src/domain/instructor/instructor.entity';
 import { StudentEntity } from '@src/domain/student/student.entity';
@@ -37,10 +41,15 @@ import {
 } from '@src/infrastructure/exceptions';
 import { member } from '@src/infrastructure/types';
 import {
+  CantUpdateToLowerBound,
   ClassNotFound,
   DuplicatedClassNameFound,
+  UnavailableToEnroll,
 } from '@src/infrastructure/exceptions/class';
 import { InstructorService } from '../instructor/instructor.service';
+import { EnrollClassDto } from './dto/enroll-class.dto';
+import { UpdateClassDto } from './dto/update-class.dto';
+import { DeleteClassDto } from './dto/delete-class.dto';
 
 describe('ClassService', () => {
   jest.setTimeout(3000000);
@@ -56,10 +65,16 @@ describe('ClassService', () => {
    */
 
   let department: DepartmentEntity;
+  let department2: DepartmentEntity;
+  let department3: DepartmentEntity;
   let instructor: MemberEntity;
+  let instructor2: MemberEntity;
   let student1: MemberEntity;
   let student2: MemberEntity;
+  let student3: MemberEntity;
   let classInfo: ClassEntity;
+  let classInfo2: ClassEntity;
+  let classInfo3: ClassEntity;
   let classImage: ClassImageEntiy;
 
   /**
@@ -90,6 +105,10 @@ describe('ClassService', () => {
     classImageRepository = dataSource.getRepository(ClassImageEntiy);
 
     department = await departmentRepository.save(exampleDepartmentEntity);
+    department2 = await departmentRepository.save(exampleDepartmentEntity2);
+    department3 = await departmentRepository.save(exampleDepartmentEntity3);
+
+    // Department : DSC
     instructor = await memberRepository.save(exampleInstructorEntity);
     instructor.instructorProfile = new InstructorEntity({
       id: instructor.id,
@@ -97,6 +116,15 @@ describe('ClassService', () => {
       department: department,
     });
     instructor = await memberRepository.save(instructor);
+
+    // Department : Game SW
+    instructor2 = await memberRepository.save(exampleInstructorEntity2);
+    instructor2.instructorProfile = new InstructorEntity({
+      id: instructor2.id,
+      groupId: exampleInstructorEntity2.groupId,
+      department: department2,
+    });
+    instructor2 = await memberRepository.save(instructor2);
 
     student1 = await memberRepository.save(exampleStudent1Entity);
     student1.studentProfile = new StudentEntity({
@@ -113,6 +141,14 @@ describe('ClassService', () => {
       department: department,
     });
     student2 = await memberRepository.save(student2);
+
+    student3 = await memberRepository.save(exampleStudent3Entity);
+    student3.studentProfile = new StudentEntity({
+      id: student3.id,
+      groupId: exampleStudent3Entity.groupId,
+      department: department2,
+    });
+    student3 = await memberRepository.save(student3);
 
     const exampleClassImage: ClassImageEntiy = {
       name: 'OS_Class_Image',
@@ -427,5 +463,130 @@ describe('ClassService', () => {
      * getAvailableClass
      *
      */
+  });
+
+  describe('Enroll classes', () => {
+    it('Generate new classes', async () => {
+      const newClass1: CreateClassDto = {
+        name: 'C Programming',
+        instructorId: instructor2.id,
+        maximum_student: 20,
+        classImageId: classImage.id,
+      };
+
+      const newClass2: CreateClassDto = {
+        name: 'Java Programming',
+        instructorId: instructor.id,
+        maximum_student: 30,
+        classImageId: classImage.id,
+      };
+
+      classInfo2 = await service.createNewClass(newClass1);
+      classInfo3 = await service.createNewClass(newClass2);
+      const instructorClassList = await service.getClassByInstructor(
+        instructor.id,
+      );
+      const instructor2ClassList = await service.getClassByInstructor(
+        instructor2.id,
+      );
+      expect(instructorClassList.length).toBe(2);
+      expect(instructor2ClassList.length).toBe(1);
+    });
+
+    it('Should get available classes', async () => {
+      //Given
+      const student1Id = student1.id;
+      const student3Id = student3.id;
+      // When
+      const s1Res = await service.getAvailableClasses(student1Id);
+      const s3Res = await service.getAvailableClasses(student3Id);
+      // Then
+      expect(s1Res.length).toBe(2);
+      expect(s3Res.length).toBe(1);
+    });
+
+    it('Should enroll class', async () => {
+      // Given
+      const enroll1: EnrollClassDto = {
+        studentId: student1.id,
+        classId: classInfo.id,
+      };
+      const enroll2: EnrollClassDto = {
+        studentId: student2.id,
+        classId: classInfo.id,
+      };
+      // When
+      const result = await service.enrollClass(enroll1);
+      const result2 = await service.enrollClass(enroll2);
+      // Then
+      expect(result).toBe(true);
+      expect(result2).toBe(true);
+    });
+
+    it('Unable to enroll class which enrolled before', async () => {
+      // Given
+      const enroll1: EnrollClassDto = {
+        studentId: student1.id,
+        classId: classInfo.id,
+      };
+      // When
+      try {
+        await service.enrollClass(enroll1);
+      } catch (err) {
+        // Then
+        expect(err).toBeInstanceOf(UnavailableToEnroll);
+      }
+    });
+
+    it('Update student count of class', async () => {
+      // Given
+      const updatedto: UpdateClassDto = {
+        id: classInfo.id,
+        maximum_student: 3,
+      };
+      // When
+      const result = await service.updateClass(updatedto);
+      // Then
+      expect(result.maximum_student).toBe(3);
+    });
+
+    it("Can't update student count as lower than enrolled student", async () => {
+      // Given
+      const updatedto: UpdateClassDto = {
+        id: classInfo.id,
+        maximum_student: 1,
+      };
+      // When
+      try {
+        await service.updateClass(updatedto);
+      } catch (err) {
+        // Then
+        expect(err).toBeInstanceOf(CantUpdateToLowerBound);
+      }
+    });
+
+    it('Should delete class', async () => {
+      // Given
+      const deleteDto: DeleteClassDto = {
+        id: classInfo.id,
+      };
+
+      // When
+      const result = await service.deleteClass(deleteDto);
+
+      // Then
+      expect(result).toBe(true);
+    });
+
+    it('Class should be delete properly', async () => {
+      // Given
+      const classId = classInfo.id;
+      // When
+      try {
+        await service.getClassById(classId);
+      } catch (err) {
+        expect(err).toBeInstanceOf(ClassNotFound);
+      }
+    });
   });
 });

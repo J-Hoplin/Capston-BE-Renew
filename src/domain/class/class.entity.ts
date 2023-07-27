@@ -64,9 +64,7 @@ export class ClassEntity {
   class_image: Relation<ClassImageEntiy>;
 
   @ApiProperty()
-  @OneToMany(() => ClassStudentEntity, (cs) => cs.classes, {
-    cascade: true,
-  })
+  @OneToMany(() => ClassStudentEntity, (cs) => cs.classes)
   classtudent: ClassStudentEntity[];
 
   @ManyToOne(() => InstructorEntity, (instructor) => instructor.classes, {

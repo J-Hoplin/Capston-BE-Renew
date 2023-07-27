@@ -18,11 +18,15 @@ export class ClassStudentEntity {
 
   @ManyToOne(() => StudentEntity, (student) => student.classstudent)
   @JoinColumn({
-    name: 'student_gid',
+    name: 'student_id',
   })
   students: Relation<StudentEntity>;
 
-  @ManyToOne(() => ClassEntity, (cls) => cls.classtudent)
+  @ManyToOne(() => ClassEntity, (cls) => cls.classtudent, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([
     {
       name: 'class_name',

@@ -6,6 +6,7 @@ export const CLASS_EXCEPTION_MSG = {
   StudentCountExceed: 'STUDENT_COUNT_EXCEED',
   DuplicatedClassNameFound: 'DUPLICATED_CLASS_NAME_FOUND',
   UnavailableToEnroll: 'UNAVAILABLE_TO_ENROLL',
+  StudentCountShouldBeUpperThanZero: 'STUDENT_COUNT_SHOULD_BE_UPPER_THAN_ZERO',
 };
 
 export class ClassNotFound extends BadRequestException {
@@ -35,5 +36,11 @@ export class DuplicatedClassNameFound extends BadRequestException {
 export class UnavailableToEnroll extends BadRequestException {
   constructor() {
     super(CLASS_EXCEPTION_MSG.UnavailableToEnroll);
+  }
+}
+
+export class StudentCountShouldBeUpperThanZero extends BadRequestException {
+  constructor() {
+    super(CLASS_EXCEPTION_MSG.StudentCountShouldBeUpperThanZero);
   }
 }

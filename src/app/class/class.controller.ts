@@ -157,6 +157,7 @@ export class ClassController {
       MEMBER_EXCEPTION_MSG.MemberNotFound,
       CLASS_EXCEPTION_MSG.DuplicatedClassNameFound,
       CLASS_IMAGE_EXCEPTION_MSG.ImageNotFound,
+      CLASS_EXCEPTION_MSG.StudentCountShouldBeUpperThanZero,
     ].join(', '),
   })
   @ApiUnauthorizedResponse({
