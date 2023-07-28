@@ -30,6 +30,7 @@ import { UpdateClassDto } from './dto/update-class.dto';
 import { DeleteClassDto } from './dto/delete-class.dto';
 import { CommonResponseDto } from '@src/infrastructure/common/common.response.dto';
 import { EnrollClassDto } from './dto/enroll-class.dto';
+import { WithdrawClassDto } from './dto/withdraw-class.dto';
 
 @ApiTags('Class')
 @Controller('class')
@@ -223,6 +224,24 @@ export class ClassController {
   })
   public async deleteClass(@Body() body: DeleteClassDto) {
     const result = await this.classService.deleteClass(body);
+    return new CommonResponseDto(result);
+  }
+
+  @Delete('/withdraw')
+  @ApiOperation({
+    summary: '수업에서 탈퇴합니다',
+  })
+  @ApiOkResponse({
+    type: CommonResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: [
+      CLASS_EXCEPTION_MSG.ClassNotFound,
+      MEMBER_EXCEPTION_MSG.MemberNotFound,
+    ].join(', '),
+  })
+  public async withdrawClass(@Body() body: WithdrawClassDto) {
+    const result = await this.classService.withdrawClass(body);
     return new CommonResponseDto(result);
   }
 }

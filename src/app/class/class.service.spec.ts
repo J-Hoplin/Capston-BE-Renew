@@ -50,6 +50,7 @@ import { InstructorService } from '../instructor/instructor.service';
 import { EnrollClassDto } from './dto/enroll-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { DeleteClassDto } from './dto/delete-class.dto';
+import { WithdrawClassDto } from './dto/withdraw-class.dto';
 
 describe('ClassService', () => {
   jest.setTimeout(3000000);
@@ -83,6 +84,7 @@ describe('ClassService', () => {
   let departmentRepository: Repository<DepartmentEntity>;
   let memberRepository: Repository<MemberEntity>;
   let classImageRepository: Repository<ClassImageEntiy>;
+  let classRepository: Repository<ClassEntity>;
 
   let exmapleClass: CreateClassDto;
 
@@ -103,6 +105,7 @@ describe('ClassService', () => {
     departmentRepository = dataSource.getRepository(DepartmentEntity);
     memberRepository = dataSource.getRepository(MemberEntity);
     classImageRepository = dataSource.getRepository(ClassImageEntiy);
+    classRepository = dataSource.getRepository(ClassEntity);
 
     department = await departmentRepository.save(exampleDepartmentEntity);
     department2 = await departmentRepository.save(exampleDepartmentEntity2);
@@ -563,6 +566,29 @@ describe('ClassService', () => {
         // Then
         expect(err).toBeInstanceOf(CantUpdateToLowerBound);
       }
+    });
+
+    it('Should withdraw class', async () => {
+      //Given
+      const widthdrawDto: WithdrawClassDto = {
+        classId: classInfo.id,
+        studentId: student1.id,
+      };
+      //When
+      const result = await service.withdrawClass(widthdrawDto);
+      //Then
+      const getStatus = await classRepository.findOne({
+        where: {
+          id: classInfo.id,
+        },
+        relations: {
+          classtudent: {
+            students: true,
+          },
+        },
+      });
+      expect(result).toBe(true);
+      expect(getStatus.classtudent.length).toBe(1);
     });
 
     it('Should delete class', async () => {

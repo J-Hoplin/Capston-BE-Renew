@@ -12,14 +12,10 @@ import {
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { CreateClassDto } from './dto/create-class.dto';
 import { InstructorService } from '../instructor/instructor.service';
-import {
-  DepartmentNotFound,
-  MemberNotFound,
-} from '@src/infrastructure/exceptions';
+import { MemberNotFound } from '@src/infrastructure/exceptions';
 import { ClassImageService } from '../class-image/class-image.service';
 import {
   ImageBuildFailed,
-  ImageNotFound,
   ImageYetPending,
 } from '@src/infrastructure/exceptions/class-image';
 import { classImg } from '@src/infrastructure/types';
@@ -30,6 +26,7 @@ import { UpdateClassDto } from './dto/update-class.dto';
 import { DeleteClassDto } from './dto/delete-class.dto';
 import { EnrollClassDto } from './dto/enroll-class.dto';
 import { ClassStudentEntity } from '@src/domain/class_student/class-student.entity';
+import { WithdrawClassDto } from './dto/withdraw-class.dto';
 
 @Injectable()
 export class ClassService {
@@ -281,5 +278,39 @@ export class ClassService {
       `Class removed : ${findClass.name}(Instructor ID : ${findClass.instructor.id})`,
     );
     return true;
+  }
+
+  public async withdrawClass(body: WithdrawClassDto) {
+    const { classId, studentId } = body;
+    const result = await this.classRepository.findOne({
+      where: {
+        id: classId,
+      },
+      relations: {
+        classtudent: {
+          students: true,
+        },
+      },
+    });
+    if (!result) {
+      throw new ClassNotFound();
+    }
+    const findMember = result.classtudent.filter(
+      (x) => x.students.id === studentId,
+    );
+    if (!findMember.length) {
+      throw new MemberNotFound();
+    }
+    result.classtudent = result.classtudent.filter(
+      (x) => x.students.id !== studentId,
+    );
+    const save = await this.dataSource.transaction(
+      async (manager: EntityManager) => {
+        const repository = manager.getRepository(ClassEntity);
+        await repository.save(result);
+        return true;
+      },
+    );
+    return save;
   }
 }

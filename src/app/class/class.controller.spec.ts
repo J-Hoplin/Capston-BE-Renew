@@ -5,6 +5,7 @@ import { CreateClassDto } from './dto/create-class.dto';
 import { EnrollClassDto } from './dto/enroll-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { DeleteClassDto } from './dto/delete-class.dto';
+import { WithdrawClassDto } from './dto/withdraw-class.dto';
 
 describe('ClassController', () => {
   let controller: ClassController;
@@ -28,6 +29,7 @@ describe('ClassController', () => {
             enrollClass: jest.fn(),
             updateClass: jest.fn(),
             deleteClass: jest.fn(),
+            withdrawClass: jest.fn(),
           },
         },
       ],
@@ -101,6 +103,12 @@ describe('ClassController', () => {
     it('Should call deleteClass', async () => {
       const spy = jest.spyOn(service, 'deleteClass');
       await controller.deleteClass({} as DeleteClassDto);
+      expect(spy).toBeCalledTimes(1);
+    });
+
+    it('Should call withdrawClass', async () => {
+      const spy = jest.spyOn(service, 'withdrawClass');
+      await controller.withdrawClass({} as WithdrawClassDto);
       expect(spy).toBeCalledTimes(1);
     });
   });
