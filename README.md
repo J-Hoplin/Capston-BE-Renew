@@ -47,4 +47,4 @@ docker-compose up -d
 
 ## ERD
 
-![img](./img/erd2.png)
+![img](./img/erd3.png)
