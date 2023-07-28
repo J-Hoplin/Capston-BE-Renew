@@ -25,7 +25,7 @@ Cloud Education Backend Member Management API
 
 ## Coverage
 
-92.77%
+94.77%
 
 ## Execution
 
