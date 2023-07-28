@@ -312,7 +312,7 @@ describe('MemberService', () => {
         originalpassword: mockCreateMemberDtoStudent(department.id).password,
       };
       // When
-      const result = await service.updateMember(updateDto);
+      const result = await service.updateMember(updateDto, memberStudent);
       // Then
       expect(result.name).toBe('changed-student');
     });
@@ -326,7 +326,7 @@ describe('MemberService', () => {
         originalpassword: mockCreateMemberDtoStudent(department.id).password,
       };
       // When
-      const result = await service.updateMember(updateDto);
+      const result = await service.updateMember(updateDto, memberInstructor);
       // Then
       expect(result.name).toBe('changed-instructor');
     });
@@ -339,7 +339,7 @@ describe('MemberService', () => {
       };
       // When
       try {
-        await service.updateMember(wrongDto);
+        await service.updateMember(wrongDto, memberStudent);
       } catch (err) {
         expect(err).toBeInstanceOf(PasswordUnmatched);
       }
@@ -459,21 +459,6 @@ describe('MemberService', () => {
   });
 
   describe('Should delete member', () => {
-    it("Can't delete non existing member", async () => {
-      //Given
-      const deleteDto: DeleteMemberDto = {
-        id: 1000,
-        password: 'test',
-      };
-      // When
-      try {
-        await service.deleteMember(deleteDto);
-      } catch (err) {
-        // Then
-        expect(err).toBeInstanceOf(MemberNotFound);
-      }
-    });
-
     it("Can't delete password unmatched member", async () => {
       //Given
       const deletDto: DeleteMemberDto = {
@@ -482,7 +467,7 @@ describe('MemberService', () => {
       };
       // When
       try {
-        await service.deleteMember(deletDto);
+        await service.deleteMember(deletDto, memberStudent);
       } catch (err) {
         expect(err).toBeInstanceOf(PasswordUnmatched);
       }
@@ -499,8 +484,14 @@ describe('MemberService', () => {
         password: 'changed-password',
       };
       //When
-      const studentResult = await service.deleteMember(studentDeleteDto);
-      const instructorResult = await service.deleteMember(instructorDeleteDto);
+      const studentResult = await service.deleteMember(
+        studentDeleteDto,
+        memberStudent,
+      );
+      const instructorResult = await service.deleteMember(
+        instructorDeleteDto,
+        memberInstructor,
+      );
       // Then
       expect(studentResult).toBe(true);
       expect(instructorResult).toBe(true);

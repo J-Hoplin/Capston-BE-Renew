@@ -8,6 +8,9 @@ import { Logger } from '@hoplin/nestjs-logger';
 import { DeleteDepartmentDto } from '../department/dto/delete-department.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MemberService } from '../member/member.service';
+import { PatchImageStatusDto } from './dto/patch-image-status.dto';
+import { v4 } from 'uuid';
+import { DeleteImageDto } from './dto/delete-image.dto';
 
 @Injectable()
 export class ClassImageService {
@@ -43,6 +46,21 @@ export class ClassImageService {
     return result.status;
   }
 
+  public async changeStatus(data: PatchImageStatusDto) {
+    const { id, status } = data;
+    const image = await this.getClassImageById(id);
+    if (!image) {
+      throw new ImageNotFound();
+    }
+    const previousStatus = image.status;
+    image.status = status;
+    await this.classImageRepository.save(image);
+    this.logger.log(
+      `Image status changed(${image.name}) : ${previousStatus} -> ${status}`,
+    );
+    return true;
+  }
+
   public async createClassImage(body: CreateImageDto) {
     const { instructor_id } = body;
 
@@ -61,7 +79,7 @@ export class ClassImageService {
         );
         // New class image entity
         const newImage = new ClassImageEntiy({
-          name: body.name,
+          name: `${body.name}_${v4()}`,
           instructor: instructor.instructorProfile,
         });
 
@@ -78,7 +96,7 @@ export class ClassImageService {
     return newImage;
   }
 
-  public async deleteClassImage(body: DeleteDepartmentDto) {
+  public async deleteClassImage(body: DeleteImageDto) {
     const { id } = body;
     const findImage = await this.classImageRepository.findOneBy({
       id,
@@ -90,7 +108,7 @@ export class ClassImageService {
       // Get Repository
       const imageRepository = manager.getRepository(ClassImageEntiy);
 
-      await imageRepository.delete(findImage);
+      await imageRepository.remove(findImage);
     });
     return true;
   }

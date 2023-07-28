@@ -126,7 +126,7 @@ describe('MemberController', () => {
   describe('Update member', () => {
     it("Should call service's updateMember once", async () => {
       const spy = jest.spyOn(service, 'updateMember');
-      await controller.updateMember(mockUpdateMemberDto);
+      await controller.updateMember(mockUpdateMemberDto, {} as MemberEntity);
       expect(spy).toBeCalledTimes(1);
     });
   });
@@ -150,7 +150,7 @@ describe('MemberController', () => {
   describe('Delete member approval', () => {
     it('Should call deleteMemberApproval once', async () => {
       const spy = jest.spyOn(service, 'deleteMember');
-      await controller.deleteMember(mockDeletememberDto);
+      await controller.deleteMember(mockDeletememberDto, {} as MemberEntity);
       expect(spy).toBeCalledTimes(1);
     });
   });

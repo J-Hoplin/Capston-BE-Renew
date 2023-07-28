@@ -33,7 +33,7 @@ export class InstructorEntity {
    *
    */
   @ManyToOne(() => DepartmentEntity, (department) => department.instructors, {
-    cascade: true,
+    cascade: ['update', 'insert'],
   })
   @JoinColumn({
     name: 'department_id',

@@ -7,10 +7,12 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ClassService } from './class.service';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -31,6 +33,12 @@ import { DeleteClassDto } from './dto/delete-class.dto';
 import { CommonResponseDto } from '@src/infrastructure/common/common.response.dto';
 import { EnrollClassDto } from './dto/enroll-class.dto';
 import { WithdrawClassDto } from './dto/withdraw-class.dto';
+import { JwtGuard } from '../authentication/jwt.guard';
+import { AllowedMember } from '../authorization/allowed.guard';
+import { Roles } from '../authorization/role.decorator';
+import { member } from '@src/infrastructure/types';
+import { Member } from '../authentication/Member.decorator';
+import { MemberEntity } from '@src/domain/member/member.entity';
 
 @ApiTags('Class')
 @Controller('class')
@@ -45,6 +53,8 @@ export class ClassController {
     type: ClassEntity,
     isArray: true,
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async getAllClass() {
     return await this.classService.getAllClass();
   }
@@ -59,6 +69,8 @@ export class ClassController {
   @ApiBadRequestResponse({
     description: CLASS_EXCEPTION_MSG.ClassNotFound,
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async getClassById(@Param('id', ParseIntPipe) id: number) {
     return await this.classService.getClassById(id);
   }
@@ -74,6 +86,8 @@ export class ClassController {
   @ApiBadRequestResponse({
     description: CLASS_EXCEPTION_MSG.ClassNotFound,
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async getClassByName(@Param('name') name: string) {
     return await this.classService.getClassByName(name);
   }
@@ -89,6 +103,8 @@ export class ClassController {
   @ApiBadRequestResponse({
     description: CLASS_EXCEPTION_MSG.ClassNotFound,
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async getClassByInstructor(@Param('id', ParseIntPipe) id: number) {
     return await this.classService.getClassByInstructor(id);
   }
@@ -100,6 +116,8 @@ export class ClassController {
   @ApiBadRequestResponse({
     description: [CLASS_EXCEPTION_MSG.ClassNotFound].join(', '),
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async getClassByInstructorAndName(
     @Param('name') name: string,
     @Param('id', ParseIntPipe) instructorId: number,
@@ -121,6 +139,8 @@ export class ClassController {
   @ApiBadRequestResponse({
     description: [DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound].join(', '),
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async getClassByDepartment(@Param('id') id: number) {
     return await this.classService.getClassByDepartment(id);
   }
@@ -142,8 +162,12 @@ export class ClassController {
   @ApiUnprocessableEntityResponse({
     description: [AUTH_EXCEPTION_MSG.EmailYetConfirmed].join(', '),
   })
-  public async getAvailableClasses(@Param('id') id: number) {
-    return await this.classService.getAvailableClasses(id);
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.STUDENT)
+  public async getAvailableClasses(@Member() student: MemberEntity) {
+    return await this.classService.getAvailableClasses(student);
   }
 
   @Post()
@@ -171,6 +195,10 @@ export class ClassController {
       AUTH_EXCEPTION_MSG.EmailYetConfirmed,
     ].join(','),
   })
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.MANAGER, member.Role.INSTRUCTOR)
   public async createNewClass(@Body() body: CreateClassDto) {
     return await this.classService.createNewClass(body);
   }
@@ -190,8 +218,15 @@ export class ClassController {
       CLASS_EXCEPTION_MSG.UnavailableToEnroll,
     ].join(', '),
   })
-  public async enrollClass(@Body() body: EnrollClassDto) {
-    const result = await this.classService.enrollClass(body);
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.STUDENT)
+  public async enrollClass(
+    @Body() body: EnrollClassDto,
+    @Member() student: MemberEntity,
+  ) {
+    const result = await this.classService.enrollClass(body, student);
     return new CommonResponseDto(result);
   }
 
@@ -208,6 +243,10 @@ export class ClassController {
       CLASS_EXCEPTION_MSG.CantUpdateToLowerBound,
     ].join(', '),
   })
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.INSTRUCTOR, member.Role.MANAGER)
   public async updateClass(@Body() body: UpdateClassDto) {
     return await this.classService.updateClass(body);
   }
@@ -222,6 +261,10 @@ export class ClassController {
   @ApiBadRequestResponse({
     description: [CLASS_EXCEPTION_MSG.ClassNotFound].join(', '),
   })
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.INSTRUCTOR, member.Role.MANAGER)
   public async deleteClass(@Body() body: DeleteClassDto) {
     const result = await this.classService.deleteClass(body);
     return new CommonResponseDto(result);
@@ -240,6 +283,10 @@ export class ClassController {
       MEMBER_EXCEPTION_MSG.MemberNotFound,
     ].join(', '),
   })
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.STUDENT)
   public async withdrawClass(@Body() body: WithdrawClassDto) {
     const result = await this.classService.withdrawClass(body);
     return new CommonResponseDto(result);

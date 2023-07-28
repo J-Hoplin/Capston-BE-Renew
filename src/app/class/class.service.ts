@@ -27,6 +27,7 @@ import { DeleteClassDto } from './dto/delete-class.dto';
 import { EnrollClassDto } from './dto/enroll-class.dto';
 import { ClassStudentEntity } from '@src/domain/class_student/class-student.entity';
 import { WithdrawClassDto } from './dto/withdraw-class.dto';
+import { MemberEntity } from '@src/domain/member/member.entity';
 
 @Injectable()
 export class ClassService {
@@ -116,8 +117,7 @@ export class ClassService {
     return findClasses;
   }
 
-  public async getAvailableClasses(id: number) {
-    const student = await this.memberService.checkApprovedStudent(id);
+  public async getAvailableClasses(student: MemberEntity) {
     // Filter department
     const filterDepartment = await this.getClassByDepartment(
       student.studentProfile.department.id,
@@ -141,7 +141,7 @@ export class ClassService {
     )
       .map((x) => x.classtudent) // Map class - student entity
       .flat()
-      .filter((x) => x.students.id === id) // filter only student
+      .filter((x) => x.students.id === student.id) // filter only student
       .map((x) => x.classes.id); // return class ids
 
     // Filter student listening classes from department classes
@@ -153,15 +153,11 @@ export class ClassService {
     return result;
   }
 
-  public async enrollClass(body: EnrollClassDto) {
-    // Check Student is valid
-    const student = await this.memberService.checkApprovedStudent(
-      body.studentId,
-    );
+  public async enrollClass(body: EnrollClassDto, student: MemberEntity) {
     //Check class exist
     const findClass = await this.getClassById(body.classId);
     // Check if it's available class
-    const checkAvailableClass = (await this.getAvailableClasses(body.studentId))
+    const checkAvailableClass = (await this.getAvailableClasses(student))
       .map((x) => x.id)
       .some((x) => x === body.classId);
 
@@ -196,7 +192,6 @@ export class ClassService {
     const instructor = await this.memberService.checkApprovedInstructor(
       body.instructorId,
     );
-
     // Check image exist
     const envImage = await this.classImageService.getClassImageById(
       body.classImageId,

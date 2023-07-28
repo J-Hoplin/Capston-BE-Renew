@@ -4,6 +4,7 @@ export const MEMBER_EXCEPTION_MSG = {
   MemberNotFound: 'MEMBER_NOT_FOUND',
   GroupIDAlreadyTaken: 'GROUP_ID_ALREADY_TAKEN',
   EmailAlreadyTaken: 'EMAIL_ALREADY_TAKEN',
+  DepartmentIdNotGiven: 'DEPARTMENT_ID_NOT_GIVEN',
 };
 
 export class MemberNotFound extends BadRequestException {
@@ -21,5 +22,11 @@ export class GroupIDAlreadyTaken extends BadRequestException {
 export class EmailAlreadyTaken extends BadRequestException {
   constructor() {
     super(`${MEMBER_EXCEPTION_MSG.EmailAlreadyTaken}`);
+  }
+}
+
+export class DepartmentIdNotGiven extends BadRequestException {
+  constructor() {
+    super(MEMBER_EXCEPTION_MSG.DepartmentIdNotGiven);
   }
 }

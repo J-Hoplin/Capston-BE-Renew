@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ClassImageService } from './class-image.service';
 import { ClassImageEntiy } from '@src/domain/class-image/classimage.entity';
 import { CommonResponseDto } from '@src/infrastructure/common/common.response.dto';
@@ -12,6 +20,7 @@ import { CLASS_IMAGE_EXCEPTION_MSG } from '@src/infrastructure/exceptions/class-
 import { CreateImageDto } from './dto/create-image.dto';
 import { MEMBER_EXCEPTION_MSG } from '@src/infrastructure/exceptions';
 import { DeleteDepartmentDto } from '../department/dto/delete-department.dto';
+import { PatchImageStatusDto } from './dto/patch-image-status.dto';
 
 @ApiTags('Class-Image')
 @Controller('class-image')
@@ -54,6 +63,22 @@ export class ClassImageController {
   })
   public async getClassImageStatus(@Param('id') id: number) {
     const result = await this.classImageService.getClassImageStatus(id);
+    return new CommonResponseDto(result);
+  }
+
+  @Patch()
+  @ApiOperation({
+    summary:
+      'Class Image status를 변경합니다. Production Level에서는 사용이 불가능하며, 테스트 용도입니다',
+  })
+  @ApiOkResponse({
+    type: CommonResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: CLASS_IMAGE_EXCEPTION_MSG.ImageNotFound,
+  })
+  public async changeStatus(@Body() data: PatchImageStatusDto) {
+    const result = await this.classImageService.changeStatus(data);
     return new CommonResponseDto(result);
   }
 

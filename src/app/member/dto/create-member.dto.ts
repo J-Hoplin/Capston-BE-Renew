@@ -7,6 +7,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -50,8 +51,11 @@ export class CreateMemberDto implements Partial<MemberEntity> {
   @IsEnum(member.Role)
   memberRole!: member.Role;
 
-  @ApiProperty()
-  @IsNotEmpty()
+  @ApiProperty({
+    required: false,
+    description: '학생 혹은 교직원 가입의 경우에는 필수입니다.',
+  })
+  @IsOptional()
   @IsNumber()
   departmentId: number;
 

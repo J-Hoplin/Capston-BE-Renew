@@ -46,16 +46,6 @@ export class ClassEntity {
   @ApiProperty()
   departmentId: number;
 
-  @Column({
-    type: 'enum',
-    enum: classImg.status,
-    default: classImg.status.PENDING,
-  })
-  @ApiProperty({
-    enum: classImg.status,
-  })
-  status: classImg.status;
-
   @ApiProperty()
   @ManyToOne(() => ClassImageEntiy, (img) => img.classes)
   @JoinColumn({

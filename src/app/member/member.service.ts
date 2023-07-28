@@ -10,6 +10,7 @@ import {
   EmailAlreadyTaken,
   InvalidMemberApproval,
   EmailYetConfirmed,
+  DepartmentIdNotGiven,
 } from '@infrastructure/exceptions';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { ConfigType } from '@nestjs/config';
@@ -97,16 +98,6 @@ export class MemberService {
     body: CreateMemberDto,
     profileImage?: Express.Multer.File,
   ): Promise<MemberEntity> {
-    // Check department exist
-    const findDepartmentById = await this.departmentRepository.findOneBy({
-      id: body.departmentId,
-    });
-
-    // Make exception if not exist
-    if (!findDepartmentById) {
-      throw new DepartmentNotFound();
-    }
-
     // Check group id exist
     await this.checkGidTaken(body.groupId);
     // Check email taken
@@ -119,7 +110,7 @@ export class MemberService {
         const memberRepository = entitymanager.getRepository(MemberEntity);
         const newMember = new MemberEntity(body);
         const groupId = body.groupId;
-        const departmentId = body.departmentId;
+        const departmentId = body?.departmentId;
         // Set profile picture destination
         newMember.profileImgURL = profileImage
           ? profileImage.destination
@@ -127,37 +118,48 @@ export class MemberService {
 
         // Set member approval
         newMember.approvedReason = 'New Member';
-        const dept = await this.departmentRepository.findOneBy({
-          id: departmentId,
-        });
-        const memberSaved = await memberRepository.save(newMember);
+        let memberSaved = await memberRepository.save(newMember);
         // If role is instructor
-        if (body.memberRole === member.Role.INSTRUCTOR) {
-          // Set Pending - for admin check if it's instructor
-          memberSaved.approved = member.Approve.PENDING;
-          // Generate Instructor entity
-          const newInstructor = new InstructorEntity({
-            id: memberSaved.id,
-            groupId: body.groupId,
-            department: dept,
+        if (
+          body.memberRole === member.Role.INSTRUCTOR ||
+          body.memberRole === member.Role.STUDENT
+        ) {
+          // Check department exist
+          const dept = await this.departmentRepository.findOneBy({
+            id: body.departmentId,
           });
-          // Set Instructor Profile
-          memberSaved.instructorProfile = newInstructor;
+          if (!dept) {
+            throw new DepartmentNotFound();
+          }
+          switch (body.memberRole) {
+            case member.Role.INSTRUCTOR:
+              // Set Pending - for admin check if it's instructor
+              memberSaved.approved = member.Approve.PENDING;
+              // Generate Instructor entity
+              const newInstructor = new InstructorEntity({
+                id: memberSaved.id,
+                groupId: body.groupId,
+                department: dept,
+              });
+              // Set Instructor Profile
+              memberSaved.instructorProfile = newInstructor;
+              break;
+            case member.Role.STUDENT:
+              // Set Approved
+              memberSaved.approved = member.Approve.APPROVE;
+              // Generate Student Entity
+              const newStudent = new StudentEntity({
+                id: memberSaved.id,
+                groupId: body.groupId,
+                department: dept,
+              });
+              // Set student profile
+              memberSaved.studentProfile = newStudent;
+              break;
+          }
+          memberSaved = await memberRepository.save(memberSaved);
         }
-        // Role is student
-        else {
-          // Set Approved
-          memberSaved.approved = member.Approve.APPROVE;
-          // Generate Student Entity
-          const newStudent = new StudentEntity({
-            id: memberSaved.id,
-            groupId: body.groupId,
-            department: dept,
-          });
-          // Set student profile
-          memberSaved.studentProfile = newStudent;
-        }
-        return await memberRepository.save(memberSaved);
+        return memberSaved;
       },
     );
     return newMember;
@@ -165,11 +167,9 @@ export class MemberService {
 
   public async updateMember(
     body: UpdateMemberDto,
+    findMember: MemberEntity,
     file?: Express.Multer.File,
   ): Promise<MemberEntity> {
-    const findMember = await this.memberRepository.findOneBy({
-      id: body.id,
-    });
     // Check member exist
     if (!findMember) {
       throw new MemberNotFound();
@@ -265,14 +265,10 @@ export class MemberService {
     return true;
   }
 
-  public async deleteMember(body: DeleteMemberDto): Promise<boolean> {
-    const findMember = await this.memberRepository.findOneBy({
-      id: body.id,
-    });
-    // Check member exist
-    if (!findMember) {
-      throw new MemberNotFound();
-    }
+  public async deleteMember(
+    body: DeleteMemberDto,
+    findMember: MemberEntity,
+  ): Promise<boolean> {
     const checkPassword = await this.comparePassword(
       body.password,
       findMember.password,
@@ -283,7 +279,7 @@ export class MemberService {
 
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const memberRepository = manager.getRepository(MemberEntity);
-      await memberRepository.delete(findMember);
+      await memberRepository.remove(findMember);
       this.logger.log(
         `Delete member : ${findMember.name}(${findMember.groupId})`,
       );

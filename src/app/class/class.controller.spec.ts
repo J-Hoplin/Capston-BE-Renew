@@ -6,6 +6,7 @@ import { EnrollClassDto } from './dto/enroll-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { DeleteClassDto } from './dto/delete-class.dto';
 import { WithdrawClassDto } from './dto/withdraw-class.dto';
+import { MemberEntity } from '@src/domain/member/member.entity';
 
 describe('ClassController', () => {
   let controller: ClassController;
@@ -78,7 +79,7 @@ describe('ClassController', () => {
 
     it('Should call getAvailableClasses', async () => {
       const spy = jest.spyOn(service, 'getAvailableClasses');
-      await controller.getAvailableClasses(1);
+      await controller.getAvailableClasses({} as MemberEntity);
       expect(spy).toBeCalledTimes(1);
     });
 
@@ -90,7 +91,7 @@ describe('ClassController', () => {
 
     it('Should call enrollClass', async () => {
       const spy = jest.spyOn(service, 'enrollClass');
-      await controller.enrollClass({} as EnrollClassDto);
+      await controller.enrollClass({} as EnrollClassDto, {} as MemberEntity);
       expect(spy).toBeCalledTimes(1);
     });
 

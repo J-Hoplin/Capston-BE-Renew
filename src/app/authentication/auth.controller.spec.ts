@@ -25,6 +25,7 @@ describe('AuthController', () => {
             refresh: jest.fn(),
             checkEmailCode: jest.fn(),
             sendEmailCode: jest.fn(),
+            logout: jest.fn(),
           },
         },
       ],
@@ -65,6 +66,12 @@ describe('AuthController', () => {
     it('send email', async () => {
       const spy = jest.spyOn(service, 'sendEmailCode');
       await controller.sendEmailCode({} as SendEmailRequestDto);
+      expect(spy).toBeCalledTimes(1);
+    });
+
+    it('logout', async () => {
+      const spy = jest.spyOn(service, 'logout');
+      await controller.logout({} as MemberEntity);
       expect(spy).toBeCalledTimes(1);
     });
   });

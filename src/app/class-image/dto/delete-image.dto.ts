@@ -6,4 +6,7 @@ export class DeleteImageDto {
   @IsNotEmpty()
   @IsNumber()
   id: number;
+  constructor(data: DeleteImageDto) {
+    Object.assign(this, data);
+  }
 }

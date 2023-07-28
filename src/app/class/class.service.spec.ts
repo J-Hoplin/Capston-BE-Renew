@@ -278,68 +278,6 @@ describe('ClassService', () => {
         await classImageRepository.save(classImage);
       }
     });
-
-    it("Can't create class because member not found", async () => {
-      // Given
-      const exmapleClass: CreateClassDto = {
-        name: 'OS',
-        instructorId: 10000,
-        maximum_student: 30,
-        classImageId: classImage.id,
-      };
-      // When
-      try {
-        await service.createNewClass(exmapleClass);
-      } catch (err) {
-        // Then
-        expect(err).toBeInstanceOf(MemberNotFound);
-      }
-    });
-
-    it("Can't create class because instructor approve status is invalid", async () => {
-      // Given
-      instructor.approved = member.Approve.REJECT;
-      await memberRepository.save(instructor);
-      const exmapleClass: CreateClassDto = {
-        name: 'OS',
-        instructorId: instructor.id,
-        maximum_student: 30,
-        classImageId: classImage.id,
-      };
-      // When
-      try {
-        await service.createNewClass(exmapleClass);
-      } catch (err) {
-        // Then
-        expect(err).toBeInstanceOf(InvalidMemberApproval);
-      } finally {
-        // Reset to approve
-        instructor.approved = member.Approve.APPROVE;
-        await memberRepository.save(instructor);
-      }
-    });
-    it("Can't create class because instrutor email yet confirmed", async () => {
-      //Given
-      instructor.emailConfirmed = false;
-      await memberRepository.save(instructor);
-      const exmapleClass: CreateClassDto = {
-        name: 'OS',
-        instructorId: instructor.id,
-        maximum_student: 30,
-        classImageId: classImage.id,
-      };
-      // When
-      try {
-        await service.createNewClass(exmapleClass);
-      } catch (err) {
-        // Then
-        expect(err).toBeInstanceOf(EmailYetConfirmed);
-      } finally {
-        // Reset to true
-        instructor.emailConfirmed = true;
-        await memberRepository.save(instructor);
-      }
-    });
   });
 
   describe('Get class information', () => {
@@ -501,8 +439,8 @@ describe('ClassService', () => {
       const student1Id = student1.id;
       const student3Id = student3.id;
       // When
-      const s1Res = await service.getAvailableClasses(student1Id);
-      const s3Res = await service.getAvailableClasses(student3Id);
+      const s1Res = await service.getAvailableClasses(student1);
+      const s3Res = await service.getAvailableClasses(student3);
       // Then
       expect(s1Res.length).toBe(2);
       expect(s3Res.length).toBe(1);
@@ -519,8 +457,8 @@ describe('ClassService', () => {
         classId: classInfo.id,
       };
       // When
-      const result = await service.enrollClass(enroll1);
-      const result2 = await service.enrollClass(enroll2);
+      const result = await service.enrollClass(enroll1, student1);
+      const result2 = await service.enrollClass(enroll2, student2);
       // Then
       expect(result).toBe(true);
       expect(result2).toBe(true);
@@ -534,7 +472,7 @@ describe('ClassService', () => {
       };
       // When
       try {
-        await service.enrollClass(enroll1);
+        await service.enrollClass(enroll1, student1);
       } catch (err) {
         // Then
         expect(err).toBeInstanceOf(UnavailableToEnroll);

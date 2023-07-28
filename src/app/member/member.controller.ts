@@ -15,12 +15,14 @@ import {
   Query,
   UnprocessableEntityException,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { MemberEntity } from '@src/domain/member/member.entity';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConsumes,
   ApiOkResponse,
   ApiOperation,
@@ -43,6 +45,11 @@ import { CommonResponseDto } from '@src/infrastructure/common/common.response.dt
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageLocalDiskOption } from '@src/infrastructure/multer';
 import { join } from 'path';
+import { JwtGuard } from '../authentication/jwt.guard';
+import { Member } from '../authentication/Member.decorator';
+import { AllowedMember } from '../authorization/allowed.guard';
+import { Roles } from '../authorization/role.decorator';
+import { member } from '@src/infrastructure/types';
 
 @ApiTags('Member')
 @Controller('member')
@@ -78,6 +85,8 @@ export class MemberController {
   @ApiBadRequestResponse({
     description: MEMBER_EXCEPTION_MSG.MemberNotFound,
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async getMemberById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<MemberEntity> {
@@ -92,6 +101,8 @@ export class MemberController {
   @ApiBadRequestResponse({
     description: MEMBER_EXCEPTION_MSG.MemberNotFound,
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async getMemberByGroupId(
     @Param('groupId') groupId: string,
   ): Promise<MemberEntity> {
@@ -107,7 +118,7 @@ export class MemberController {
   )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
-    summary: '새로운 회원을 가입시킵니다.',
+    summary: '회원가입을 진행합니다.',
     description: '비밀번호는 Bcrypt를 사용해 단방향 암호화합니다',
   })
   @ApiOkResponse({ type: MemberEntity })
@@ -118,6 +129,7 @@ export class MemberController {
     description: [
       DEPARTMENT_EXCEPTION_MSG.DepartmentNotFound,
       MEMBER_EXCEPTION_MSG.GroupIDAlreadyTaken,
+      MEMBER_EXCEPTION_MSG.DepartmentIdNotGiven,
     ].join(', '),
   })
   public async createMember(
@@ -157,8 +169,11 @@ export class MemberController {
   @ApiUnauthorizedResponse({
     description: AUTH_EXCEPTION_MSG.PasswordUnmatched,
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async updateMember(
     @Body() body: UpdateMemberDto,
+    @Member() member: MemberEntity,
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
@@ -172,7 +187,7 @@ export class MemberController {
     )
     file?: Express.Multer.File,
   ): Promise<MemberEntity> {
-    return await this.memberService.updateMember(body, file);
+    return await this.memberService.updateMember(body, member, file);
   }
 
   @Get('/email/:email')
@@ -219,7 +234,7 @@ export class MemberController {
 
   @Patch('/approval')
   @ApiOperation({
-    summary: '회원 계정 상태를 변경합니다',
+    summary: '회원 계정 상태를 변경합니다. Manager 권한이 요구됩니다.',
     description:
       '상태 변경시, 변경 사유를 필수로 입력해야합니다. ex) 계정 정지시 정지사유',
   })
@@ -227,6 +242,10 @@ export class MemberController {
   @ApiBadRequestResponse({
     description: MEMBER_EXCEPTION_MSG.MemberNotFound,
   })
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.MANAGER)
   public async updateMemberApproval(
     @Body() body: UpdateMemberApprovalDto,
   ): Promise<CommonResponseDto> {
@@ -247,9 +266,14 @@ export class MemberController {
   @ApiUnauthorizedResponse({
     description: AUTH_EXCEPTION_MSG.PasswordUnmatched,
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   public async deleteMember(
     @Body() body: DeleteMemberDto,
+    @Member() member: MemberEntity,
   ): Promise<CommonResponseDto> {
-    return new CommonResponseDto(await this.memberService.deleteMember(body));
+    return new CommonResponseDto(
+      await this.memberService.deleteMember(body, member),
+    );
   }
 }
