@@ -14,6 +14,8 @@ import {
   ParseFilePipeBuilder,
   HttpStatus,
   UnprocessableEntityException,
+  ParseBoolPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { DepartmentEntity } from '@src/domain/department/department.entity';
 import { DepartmentService } from './department.service';
@@ -22,6 +24,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { imageLocalDiskOption } from '@src/infrastructure/multer';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConsumes,
   ApiOkResponse,
   ApiOperation,
@@ -32,6 +35,10 @@ import { DEPARTMENT_EXCEPTION_MSG } from '@src/infrastructure/exceptions';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { CommonResponseDto } from '@src/infrastructure/common/common.response.dto';
 import { DeleteDepartmentDto } from './dto/delete-department.dto';
+import { AllowedMember } from '../authorization/allowed.guard';
+import { JwtGuard } from '../authentication/jwt.guard';
+import { Roles } from '../authorization/role.decorator';
+import { member } from '@src/infrastructure/types';
 
 @ApiTags('Department')
 @Controller('department')
@@ -48,9 +55,10 @@ export class DepartmentController {
     isArray: true,
   })
   public async getAllDepartments(
-    @Query('detail', new DefaultValuePipe(false)) detail?: boolean,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pagesize', new DefaultValuePipe(10), ParseIntPipe) pagesize: number,
   ): Promise<DepartmentEntity[]> {
-    return await this.departmentService.getAllDepartments(detail);
+    return await this.departmentService.getAllDepartments(page, pagesize);
   }
 
   @Get('/id/:id')
@@ -101,6 +109,10 @@ export class DepartmentController {
   @ApiBadRequestResponse({
     description: DEPARTMENT_EXCEPTION_MSG.DepartmentNameAlreadyTaken,
   })
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.MANAGER)
   public async createDepartment(
     @Body() body: CreateDepartmentDto,
     @UploadedFile(
@@ -134,6 +146,10 @@ export class DepartmentController {
   @ApiBadRequestResponse({
     description: DEPARTMENT_EXCEPTION_MSG.DepartmentNameAlreadyTaken,
   })
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.MANAGER)
   public async updateDepartment(
     @Body() body: UpdateDepartmentDto,
     @UploadedFile(
@@ -157,6 +173,10 @@ export class DepartmentController {
     summary: '학부를 삭제합니다',
   })
   @ApiOkResponse({ type: CommonResponseDto })
+  @ApiBearerAuth()
+  @UseGuards(AllowedMember)
+  @UseGuards(JwtGuard)
+  @Roles(member.Role.MANAGER)
   public async deleteDepartment(@Body() body: DeleteDepartmentDto) {
     return new CommonResponseDto(
       await this.departmentService.deleteDepartment(body),

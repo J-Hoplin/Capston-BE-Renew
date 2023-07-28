@@ -272,4 +272,15 @@ describe('AuthenticationService', () => {
       expect(randomKey).not.toBeUndefined();
     });
   });
+
+  describe('Logout', () => {
+    it('Should logout', async () => {
+      //Given
+      const member = mockedMemberEntity as MemberEntity;
+      // When
+      const result = await service.logout(member);
+      // Then
+      expect(result).toBe(true);
+    });
+  });
 });

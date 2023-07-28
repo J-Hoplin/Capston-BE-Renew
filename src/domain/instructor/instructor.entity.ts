@@ -20,29 +20,34 @@ import { ApiProperty } from '@nestjs/swagger';
 export class InstructorEntity {
   @PrimaryColumn() // Should be member.groupId
   @ApiProperty()
-  id: string;
+  id: number;
 
+  @Column({
+    type: String,
+  })
+  @ApiProperty()
+  groupId: string;
   /**
    * Circular Dependency Issue
    * https://github.com/typeorm/typeorm/issues/4526
    *
    */
   @ManyToOne(() => DepartmentEntity, (department) => department.instructors, {
-    cascade: true,
+    cascade: ['update', 'insert'],
   })
   @JoinColumn({
     name: 'department_id',
   })
   @ApiProperty()
-  department: number;
+  department: Relation<DepartmentEntity>;
 
   @OneToMany(() => ClassEntity, (cls) => cls.instructor)
   @ApiProperty()
-  classes: ClassEntity[];
+  classes: Relation<ClassEntity>[];
 
   @OneToMany(() => ClassImageEntiy, (ci) => ci.instructor)
   @ApiProperty()
-  images: ClassImageEntiy[];
+  images: Relation<ClassImageEntiy>[];
 
   constructor(data: Partial<InstructorEntity>) {
     Object.assign(this, data);

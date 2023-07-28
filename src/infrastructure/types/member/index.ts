@@ -3,6 +3,7 @@ export enum Sex {
   FEMALE = 'female',
 }
 
+export const RoleMetaDataKey = 'ROLES';
 export enum Role {
   STUDENT = 'student',
   INSTRUCTOR = 'instructor',

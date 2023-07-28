@@ -12,5 +12,6 @@ import { DepartmentEntity } from '@src/domain/department/department.entity';
   ],
   controllers: [DepartmentController],
   providers: [DepartmentService],
+  exports: [DepartmentService],
 })
 export class DepartmentModule {}

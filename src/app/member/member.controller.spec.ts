@@ -54,12 +54,12 @@ describe('MemberController', () => {
 
   describe('findAll', () => {
     it('Should get all member list', async () => {
-      expect(await controller.getAllMembers(true)).toBe(mockMemberEntities);
+      expect(await controller.getAllMembers(1, 10)).toBe(mockMemberEntities);
     });
 
     it("Should call service's getAllMembers once", async () => {
       const spy = jest.spyOn(service, 'getAllMembers');
-      expect(await controller.getAllMembers(true)).toBe(mockMemberEntities);
+      expect(await controller.getAllMembers(1, 10)).toBe(mockMemberEntities);
       expect(spy).toBeCalledTimes(1);
     });
   });
@@ -126,7 +126,7 @@ describe('MemberController', () => {
   describe('Update member', () => {
     it("Should call service's updateMember once", async () => {
       const spy = jest.spyOn(service, 'updateMember');
-      await controller.updateMember(mockUpdateMemberDto);
+      await controller.updateMember(mockUpdateMemberDto, {} as MemberEntity);
       expect(spy).toBeCalledTimes(1);
     });
   });
@@ -150,7 +150,7 @@ describe('MemberController', () => {
   describe('Delete member approval', () => {
     it('Should call deleteMemberApproval once', async () => {
       const spy = jest.spyOn(service, 'deleteMember');
-      await controller.deleteMember(mockDeletememberDto);
+      await controller.deleteMember(mockDeletememberDto, {} as MemberEntity);
       expect(spy).toBeCalledTimes(1);
     });
   });

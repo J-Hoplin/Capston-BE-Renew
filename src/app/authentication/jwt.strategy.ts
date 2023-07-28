@@ -33,20 +33,27 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (payload.sub !== JwtSubjectType.ACCESS) {
       throw new AccessTokenRequired();
     }
-    const user = await this.memberRepository.findOneBy({ id: payload.user_id });
+    const user = await this.memberRepository.findOne({
+      where: {
+        id: payload.user_id,
+      },
+      relations: {
+        instructorProfile: {
+          department: true,
+        },
+        studentProfile: {
+          department: true,
+        },
+      },
+    });
+    console.log(user);
     // If user not found
     if (!user) {
       throw new MemberNotFound();
     }
 
     // If member's approval status is improper
-    if (
-      [
-        member.Approve.PENDING,
-        member.Approve.REJECT,
-        member.Approve.RESTRICT,
-      ].includes(user.approved)
-    ) {
+    if (user.approved !== member.Approve.APPROVE) {
       throw new InvalidMemberApproval();
     }
     return user;

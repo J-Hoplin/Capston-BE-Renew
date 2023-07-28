@@ -5,24 +5,32 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  PrimaryGeneratedColumn,
+  Relation,
   Unique,
 } from 'typeorm';
 import { CommonEntity } from '../common.abstract';
 import { InstructorEntity } from '@domain/instructor/instructor.entity';
 import { StudentEntity } from '@domain/student/student.entity';
-import { member } from '@src/infrastructure/types';
+import { classImg, member } from '@src/infrastructure/types';
 import { ApiProperty } from '@nestjs/swagger';
 import { ClassStudentEntity } from '@domain/class_student/class-student.entity';
+import { ClassImageEntiy } from '../class-image/classimage.entity';
 
 @Entity('class')
-@Unique('class_division', ['name', 'divisionNumber'])
-export class ClassEntity extends CommonEntity {
+@Unique('instructor_class', ['name', 'instructor'])
+export class ClassEntity {
+  @PrimaryGeneratedColumn()
+  @ApiProperty()
+  id: number;
+
   @Column({
-    type: Number,
+    type: String,
     nullable: false,
+    unique: true,
   })
   @ApiProperty()
-  divisionNumber: number;
+  name: string;
 
   @Column({
     type: Number,
@@ -36,7 +44,18 @@ export class ClassEntity extends CommonEntity {
     nullable: false,
   })
   @ApiProperty()
-  repositoryEndpoit: string;
+  departmentId: number;
+
+  @ApiProperty()
+  @ManyToOne(() => ClassImageEntiy, (img) => img.classes)
+  @JoinColumn({
+    name: 'class_container_image_id',
+  })
+  class_image: Relation<ClassImageEntiy>;
+
+  @ApiProperty()
+  @OneToMany(() => ClassStudentEntity, (cs) => cs.classes)
+  classtudent: ClassStudentEntity[];
 
   @ManyToOne(() => InstructorEntity, (instructor) => instructor.classes, {
     cascade: true,
@@ -45,9 +64,9 @@ export class ClassEntity extends CommonEntity {
     name: 'instructor_id',
   })
   @ApiProperty()
-  instructor: InstructorEntity;
+  instructor: Relation<InstructorEntity>;
 
-  @OneToMany(() => ClassStudentEntity, (cs) => cs.classes)
-  @ApiProperty()
-  classstudent: ClassStudentEntity[];
+  constructor(data: Partial<ClassEntity>) {
+    Object.assign(this, data);
+  }
 }

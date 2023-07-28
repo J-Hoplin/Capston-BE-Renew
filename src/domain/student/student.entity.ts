@@ -9,6 +9,7 @@ import {
   OneToMany,
   PrimaryColumn,
   PrimaryGeneratedColumn,
+  Relation,
 } from 'typeorm';
 import { DepartmentEntity } from '@domain/department/department.entity';
 import { ClassEntity } from '@domain/class/class.entity';
@@ -20,7 +21,14 @@ import { ApiProperty } from '@nestjs/swagger';
 export class StudentEntity {
   @PrimaryColumn()
   @ApiProperty()
-  id: string;
+  id: number;
+
+  @Column({
+    type: String,
+    unique: true,
+  })
+  @ApiProperty()
+  groupId: string;
 
   @ManyToOne(() => DepartmentEntity, (department) => department.students, {
     cascade: ['update', 'insert'],
@@ -29,10 +37,10 @@ export class StudentEntity {
     name: 'department_id',
   })
   @ApiProperty()
-  department: number;
+  department: Relation<DepartmentEntity>;
 
   @OneToMany(() => ClassStudentEntity, (cs) => cs.students)
-  classstudent: ClassStudentEntity[];
+  classstudent: Relation<ClassStudentEntity>[];
 
   constructor(data: Partial<StudentEntity>) {
     Object.assign(this, data);

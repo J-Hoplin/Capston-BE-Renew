@@ -6,6 +6,7 @@ import {
   Req,
   UseGuards,
   Query,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -29,6 +30,10 @@ import { JwtGuard } from './jwt.guard';
 import { join } from 'path';
 import { SendEmailRequestDto } from './dto/SendEmail.request.dto';
 import { CommonResponseDto } from '@src/infrastructure/common/common.response.dto';
+import { Member } from './Member.decorator';
+import { member } from '@src/infrastructure/types';
+import { AllowedMember } from '../authorization/allowed.guard';
+import { MemberEntity } from '@src/domain/member/member.entity';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -101,6 +106,16 @@ export class AuthController {
     @Body() body: SendEmailRequestDto,
   ): Promise<CommonResponseDto> {
     const result = await this.authService.sendEmailCode(body);
+    return new CommonResponseDto(result);
+  }
+
+  @Delete('/logout')
+  @ApiOperation({ summary: '로그아웃을 진행합니다' })
+  @ApiOkResponse({ type: CommonResponseDto })
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
+  public async logout(@Member() member: MemberEntity) {
+    const result = await this.authService.logout(member);
     return new CommonResponseDto(result);
   }
 }

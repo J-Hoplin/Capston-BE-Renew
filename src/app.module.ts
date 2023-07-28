@@ -11,6 +11,10 @@ import { MemberModule } from './app/member/member.module';
 import { AuthModule } from './app/authentication/auth.module';
 import { MailModule } from './app/mail/mail.module';
 import { DepartmentModule } from './app/department/department.module';
+import { ClassImageModule } from './app/class-image/class-image.module';
+import { InstructorModule } from './app/instructor/instructor.module';
+import { ClassModule } from './app/class/class.module';
+import { StudentModule } from './app/student/student.module';
 
 @Module({
   imports: [
@@ -30,6 +34,10 @@ import { DepartmentModule } from './app/department/department.module';
     AuthModule,
     MailModule,
     DepartmentModule,
+    ClassImageModule,
+    InstructorModule,
+    ClassModule,
+    StudentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

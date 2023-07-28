@@ -11,7 +11,9 @@ import defaultConfig from '@src/config/config/default.config';
 import { DataSource } from 'typeorm';
 import {
   EmailAlreadyTaken,
+  EmailYetConfirmed,
   GroupIDAlreadyTaken,
+  InvalidMemberApproval,
   MemberNotFound,
   PasswordUnmatched,
 } from '@src/infrastructure/exceptions';
@@ -216,7 +218,7 @@ describe('MemberService', () => {
     it('Get all mmebers', async () => {
       // Given
       // When
-      const result = await service.getAllMembers(false);
+      const result = await service.getAllMembers(1, 10);
       // Then
       expect(result.length).toBe(2);
     });
@@ -310,7 +312,7 @@ describe('MemberService', () => {
         originalpassword: mockCreateMemberDtoStudent(department.id).password,
       };
       // When
-      const result = await service.updateMember(updateDto);
+      const result = await service.updateMember(updateDto, memberStudent);
       // Then
       expect(result.name).toBe('changed-student');
     });
@@ -324,7 +326,7 @@ describe('MemberService', () => {
         originalpassword: mockCreateMemberDtoStudent(department.id).password,
       };
       // When
-      const result = await service.updateMember(updateDto);
+      const result = await service.updateMember(updateDto, memberInstructor);
       // Then
       expect(result.name).toBe('changed-instructor');
     });
@@ -337,7 +339,7 @@ describe('MemberService', () => {
       };
       // When
       try {
-        await service.updateMember(wrongDto);
+        await service.updateMember(wrongDto, memberStudent);
       } catch (err) {
         expect(err).toBeInstanceOf(PasswordUnmatched);
       }
@@ -401,22 +403,62 @@ describe('MemberService', () => {
     });
   });
 
-  describe('Should delete member', () => {
-    it("Can't delete non existing member", async () => {
-      //Given
-      const deleteDto: DeleteMemberDto = {
-        id: 1000,
-        password: 'test',
-      };
-      // When
+  describe('It check student/instructor approved', () => {
+    it('Should return student not found', async () => {
+      // Given : Give instructor id
+      const id = memberInstructor.id;
       try {
-        await service.deleteMember(deleteDto);
+        // When
+        await service.checkApprovedStudent(id);
       } catch (err) {
         // Then
         expect(err).toBeInstanceOf(MemberNotFound);
       }
     });
 
+    it('Should return Invalid member approval exception', async () => {
+      //Given
+      const id = memberStudent.id;
+      try {
+        // When
+        await service.checkApprovedStudent(id);
+      } catch (err) {
+        // Then
+        expect(err).toBeInstanceOf(InvalidMemberApproval);
+      }
+    });
+
+    it('Should return Email not confirmed exception', async () => {
+      // Given
+      // Change member approval
+      await service.updateMemberApproval({
+        id: memberStudent.id,
+        approved: member.Approve.APPROVE,
+        approvedReason: 'test',
+      });
+      memberStudent = await service.getMemberById(memberStudent.id);
+      const id = memberStudent.id;
+      try {
+        // When
+        await service.checkApprovedStudent(id);
+      } catch (err) {
+        // Then
+        expect(err).toBeInstanceOf(EmailYetConfirmed);
+      }
+    });
+
+    it('Should return member entiity', async () => {
+      // Given
+      const repository = dataSource.getRepository(MemberEntity);
+      memberStudent.emailConfirmed = true;
+      await repository.save(memberStudent);
+      const result = await service.checkApprovedStudent(memberStudent.id);
+      expect(result).toBeInstanceOf(MemberEntity);
+      expect(result.id).toBe(memberStudent.id);
+    });
+  });
+
+  describe('Should delete member', () => {
     it("Can't delete password unmatched member", async () => {
       //Given
       const deletDto: DeleteMemberDto = {
@@ -425,7 +467,7 @@ describe('MemberService', () => {
       };
       // When
       try {
-        await service.deleteMember(deletDto);
+        await service.deleteMember(deletDto, memberStudent);
       } catch (err) {
         expect(err).toBeInstanceOf(PasswordUnmatched);
       }
@@ -442,8 +484,14 @@ describe('MemberService', () => {
         password: 'changed-password',
       };
       //When
-      const studentResult = await service.deleteMember(studentDeleteDto);
-      const instructorResult = await service.deleteMember(instructorDeleteDto);
+      const studentResult = await service.deleteMember(
+        studentDeleteDto,
+        memberStudent,
+      );
+      const instructorResult = await service.deleteMember(
+        instructorDeleteDto,
+        memberInstructor,
+      );
       // Then
       expect(studentResult).toBe(true);
       expect(instructorResult).toBe(true);
