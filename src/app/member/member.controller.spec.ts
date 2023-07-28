@@ -54,12 +54,12 @@ describe('MemberController', () => {
 
   describe('findAll', () => {
     it('Should get all member list', async () => {
-      expect(await controller.getAllMembers(true)).toBe(mockMemberEntities);
+      expect(await controller.getAllMembers(1, 10)).toBe(mockMemberEntities);
     });
 
     it("Should call service's getAllMembers once", async () => {
       const spy = jest.spyOn(service, 'getAllMembers');
-      expect(await controller.getAllMembers(true)).toBe(mockMemberEntities);
+      expect(await controller.getAllMembers(1, 10)).toBe(mockMemberEntities);
       expect(spy).toBeCalledTimes(1);
     });
   });

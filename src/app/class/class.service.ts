@@ -42,8 +42,11 @@ export class ClassService {
     private readonly logger: Logger,
   ) {}
 
-  public async getAllClass() {
-    return await this.classRepository.find();
+  public async getAllClass(page: number, pagesize: number) {
+    return await this.classRepository.find({
+      skip: page - 1,
+      take: pagesize,
+    });
   }
 
   public async getClassById(id: number) {

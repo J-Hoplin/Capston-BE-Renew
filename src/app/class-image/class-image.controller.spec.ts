@@ -34,7 +34,7 @@ describe('ClassImageController', () => {
   describe("It should call it's service once", () => {
     it('Should call getAllClassIages', async () => {
       const spy = jest.spyOn(service, 'getAllClassImages');
-      await controller.getAllClassImages();
+      await controller.getAllClassImages(1, 10);
       expect(spy).toBeCalledTimes(1);
     });
 

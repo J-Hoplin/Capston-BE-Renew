@@ -218,7 +218,7 @@ describe('MemberService', () => {
     it('Get all mmebers', async () => {
       // Given
       // When
-      const result = await service.getAllMembers(false);
+      const result = await service.getAllMembers(1, 10);
       // Then
       expect(result.length).toBe(2);
     });

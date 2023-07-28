@@ -22,8 +22,11 @@ export class ClassImageService {
     private readonly logger: Logger,
   ) {}
 
-  public async getAllClassImages() {
-    return await this.classImageRepository.find();
+  public async getAllClassImages(page: number, pagesize: number) {
+    return await this.classImageRepository.find({
+      skip: page - 1,
+      take: pagesize,
+    });
   }
 
   public async getClassImageById(id: number) {

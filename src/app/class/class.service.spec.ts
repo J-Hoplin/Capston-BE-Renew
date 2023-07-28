@@ -284,7 +284,7 @@ describe('ClassService', () => {
     it('Should get all classes', async () => {
       // Given
       //When
-      const result = await service.getAllClass();
+      const result = await service.getAllClass(1, 10);
       // Then
       expect(result).toBeInstanceOf(Array);
       expect(result.length).toBe(1);

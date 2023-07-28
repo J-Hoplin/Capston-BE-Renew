@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ClassService } from './class.service';
@@ -55,8 +57,11 @@ export class ClassController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtGuard)
-  public async getAllClass() {
-    return await this.classService.getAllClass();
+  public async getAllClass(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pagesize', new DefaultValuePipe(10), ParseIntPipe) pagesize: number,
+  ) {
+    return await this.classService.getAllClass(page, pagesize);
   }
 
   @Get('/id/:id')

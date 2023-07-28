@@ -181,7 +181,7 @@ describe('DepartmentService', () => {
     it('Should exist 2 departments', async () => {
       //Given
       //When
-      const getAllDepartments = await service.getAllDepartments(false);
+      const getAllDepartments = await service.getAllDepartments(1, 10);
       //Then
       expect(getAllDepartments.length).toBe(2);
     });

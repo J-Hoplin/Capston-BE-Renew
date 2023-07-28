@@ -55,10 +55,10 @@ export class DepartmentController {
     isArray: true,
   })
   public async getAllDepartments(
-    @Query('detail', new DefaultValuePipe(false), ParseBoolPipe)
-    detail?: boolean,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pagesize', new DefaultValuePipe(10), ParseIntPipe) pagesize: number,
   ): Promise<DepartmentEntity[]> {
-    return await this.departmentService.getAllDepartments(detail);
+    return await this.departmentService.getAllDepartments(page, pagesize);
   }
 
   @Get('/id/:id')

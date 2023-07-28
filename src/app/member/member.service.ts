@@ -49,11 +49,16 @@ export class MemberService {
     return await bcrypt.compare(password, hashedPassword);
   }
 
-  public async getAllMembers(detail: boolean): Promise<MemberEntity[]> {
+  public async getAllMembers(
+    page: number,
+    pagesize: number,
+  ): Promise<MemberEntity[]> {
     const result = await this.memberRepository.find({
+      skip: page - 1,
+      take: pagesize,
       relations: {
-        studentProfile: detail,
-        instructorProfile: detail,
+        studentProfile: true,
+        instructorProfile: true,
       },
     });
 

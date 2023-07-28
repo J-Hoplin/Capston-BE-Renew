@@ -172,7 +172,7 @@ describe('ClassImageService', () => {
     it('Get all images', async () => {
       // Given
       // When
-      const result = await service.getAllClassImages();
+      const result = await service.getAllClassImages(1, 10);
       // Then
       expect(result.length).toBe(1);
     });
@@ -209,7 +209,7 @@ describe('ClassImageService', () => {
       //Given
       const id = generatedImage.id;
       // When
-      const result1 = await service.getAllClassImages();
+      const result1 = await service.getAllClassImages(1, 10);
       // Then
       expect(result1.length).toBe(0);
       try {

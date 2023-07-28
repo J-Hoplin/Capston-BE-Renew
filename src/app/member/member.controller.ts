@@ -64,15 +64,11 @@ export class MemberController {
     type: MemberEntity,
     isArray: true,
   })
-  @ApiQuery({
-    name: 'detail',
-    required: false,
-    description: '학생 및 교직원의 세부정보를 불러오는지의 여부입니다.',
-  })
   public async getAllMembers(
-    @Query('detail', new DefaultValuePipe(false), ParseBoolPipe) detail,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pagesize', new DefaultValuePipe(10), ParseIntPipe) pagesize: number,
   ): Promise<MemberEntity[]> {
-    return await this.memberService.getAllMembers(detail);
+    return await this.memberService.getAllMembers(page, pagesize);
   }
 
   @Get('/id/:id')

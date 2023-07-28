@@ -1,11 +1,14 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ClassImageService } from './class-image.service';
 import { ClassImageEntiy } from '@src/domain/class-image/classimage.entity';
@@ -35,8 +38,11 @@ export class ClassImageController {
     type: ClassImageEntiy,
     isArray: true,
   })
-  public async getAllClassImages() {
-    return await this.classImageService.getAllClassImages();
+  public async getAllClassImages(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pagesize', new DefaultValuePipe(10), ParseIntPipe) pagesize: number,
+  ) {
+    return await this.classImageService.getAllClassImages(page, pagesize);
   }
 
   @Get(':id')

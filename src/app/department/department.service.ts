@@ -22,11 +22,16 @@ export class DepartmentService {
     private readonly logger: Logger,
   ) {}
 
-  public async getAllDepartments(detail: boolean): Promise<DepartmentEntity[]> {
+  public async getAllDepartments(
+    page: number,
+    pagesize: number,
+  ): Promise<DepartmentEntity[]> {
     const result = await this.departmentRepository.find({
+      skip: page - 1,
+      take: pagesize,
       relations: {
-        students: detail,
-        instructors: detail,
+        students: true,
+        instructors: true,
       },
     });
     return result;

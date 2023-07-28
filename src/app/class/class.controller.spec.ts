@@ -43,7 +43,7 @@ describe('ClassController', () => {
   describe('Class controller service call check', () => {
     it('Should call getAllClass once', async () => {
       const spy = jest.spyOn(service, 'getAllClass');
-      await controller.getAllClass();
+      await controller.getAllClass(1, 10);
       expect(spy).toBeCalledTimes(1);
     });
 

@@ -33,7 +33,7 @@ describe('DepartmentController', () => {
   describe('Department controller service call check', () => {
     it('Should call get all department once', async () => {
       const spy = jest.spyOn(service, 'getAllDepartments');
-      await controller.getAllDepartments();
+      await controller.getAllDepartments(1, 10);
       expect(spy).toBeCalledTimes(1);
     });
 
