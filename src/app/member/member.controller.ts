@@ -73,7 +73,7 @@ export class MemberController {
 
   @Get('/id/:id')
   @ApiOperation({
-    summary: '회원 정보를 id를 통해 조회합니다.',
+    summary: '회원 정보를 id를 통해 조회합니다. 로그인이 요구됩니다.',
   })
   @ApiOkResponse({
     type: MemberEntity,
@@ -91,7 +91,7 @@ export class MemberController {
 
   @Get('/gid/:groupId')
   @ApiOperation({
-    summary: '회원 정보를 Group ID를 통해 조회합니다',
+    summary: '회원 정보를 Group ID를 통해 조회합니다. 로그인이 요구됩니다.',
     description: 'Group ID는 학생, 교직원의 고유 ID를 의미합니다',
   })
   @ApiBadRequestResponse({
@@ -148,7 +148,7 @@ export class MemberController {
 
   @Patch()
   @ApiOperation({
-    summary: '회원 정보를 수정합니다',
+    summary: '회원 정보를 수정합니다. 로그인이 요구됩니다.',
     description:
       '이름, 비밀번호, 생일 정보만 변경 가능합니다. 회원정보 변경을 위해서는 비밀번호 입력이 필수입니다.',
   })
@@ -252,7 +252,7 @@ export class MemberController {
 
   @Delete()
   @ApiOperation({
-    summary: '회원을 탈퇴합니다',
+    summary: '회원을 탈퇴합니다. 로그인이 요구됩니다.',
     description: '탈퇴시 비밀번호 확인이 진행됩니다.',
   })
   @ApiOkResponse({ type: CommonResponseDto })

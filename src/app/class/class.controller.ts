@@ -152,7 +152,8 @@ export class ClassController {
 
   @Get('/available/:id')
   @ApiOperation({
-    summary: '학생이 수강 가능한 수업 목록들을 불러옵니다.',
+    summary:
+      '학생이 수강 가능한 수업 목록들을 불러옵니다. 학생과 Manager만 접근이 가능합니다.',
   })
   @ApiOkResponse({
     type: ClassEntity,
@@ -170,14 +171,14 @@ export class ClassController {
   @ApiBearerAuth()
   @UseGuards(AllowedMember)
   @UseGuards(JwtGuard)
-  @Roles(member.Role.STUDENT)
+  @Roles(member.Role.STUDENT, member.Role.MANAGER)
   public async getAvailableClasses(@Member() student: MemberEntity) {
     return await this.classService.getAvailableClasses(student);
   }
 
   @Post()
   @ApiOperation({
-    summary: '수업을 생성합니다',
+    summary: '수업을 생성합니다. Manager와 교직원만 접근가능합니다.',
   })
   @ApiOkResponse({
     type: ClassEntity,
@@ -210,7 +211,7 @@ export class ClassController {
 
   @Post('/enroll')
   @ApiOperation({
-    summary: '학생이 수업을 등록합니다.',
+    summary: '학생이 수업을 등록합니다. 학생과 Manaer만 접근이 가능합니다.',
   })
   @ApiOkResponse({
     type: CommonResponseDto,
@@ -226,7 +227,7 @@ export class ClassController {
   @ApiBearerAuth()
   @UseGuards(AllowedMember)
   @UseGuards(JwtGuard)
-  @Roles(member.Role.STUDENT)
+  @Roles(member.Role.STUDENT, member.Role.MANAGER)
   public async enrollClass(
     @Body() body: EnrollClassDto,
     @Member() student: MemberEntity,
@@ -237,7 +238,7 @@ export class ClassController {
 
   @Patch()
   @ApiOperation({
-    summary: '수업 정보를 수정합니다.',
+    summary: '수업 정보를 수정합니다. 교직원과 Manager만 접근이 가능합니다.',
   })
   @ApiOkResponse({
     type: ClassEntity,
@@ -258,7 +259,7 @@ export class ClassController {
 
   @Delete()
   @ApiOperation({
-    summary: '수업을 삭제합니다.',
+    summary: '수업을 삭제합니다. 교직원과 Manager만 접근이 가능합니다.',
   })
   @ApiOkResponse({
     type: CommonResponseDto,
@@ -277,7 +278,7 @@ export class ClassController {
 
   @Delete('/withdraw')
   @ApiOperation({
-    summary: '수업에서 탈퇴합니다',
+    summary: '수업에서 탈퇴합니다. 학생과 Manager만 접근이 가능합니다.',
   })
   @ApiOkResponse({
     type: CommonResponseDto,
@@ -291,7 +292,7 @@ export class ClassController {
   @ApiBearerAuth()
   @UseGuards(AllowedMember)
   @UseGuards(JwtGuard)
-  @Roles(member.Role.STUDENT)
+  @Roles(member.Role.STUDENT, member.Role.MANAGER)
   public async withdrawClass(@Body() body: WithdrawClassDto) {
     const result = await this.classService.withdrawClass(body);
     return new CommonResponseDto(result);
