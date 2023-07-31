@@ -65,6 +65,7 @@ export class MemberEntity extends CommonEntity {
     type: 'enum',
     enum: member.Approve,
     nullable: false,
+    default: member.Approve.APPROVE,
   })
   @ApiProperty({
     enum: member.Approve,

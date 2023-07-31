@@ -93,7 +93,7 @@ export class DepartmentController {
 
   @Post('/')
   @ApiOperation({
-    summary: '새 학부(혹은 부서)를 생성합니다',
+    summary: '새 학부(혹은 부서)를 생성합니다. Manager 권한이 요구됩니다',
   })
   @UseInterceptors(
     FileInterceptor(
@@ -133,7 +133,7 @@ export class DepartmentController {
 
   @Patch('/')
   @ApiOperation({
-    summary: '학부 정보를 수정합니다',
+    summary: '학부 정보를 수정합니다. Manager 권한이 요구됩니다',
   })
   @UseInterceptors(
     FileInterceptor(
@@ -170,7 +170,7 @@ export class DepartmentController {
 
   @Delete('/')
   @ApiOperation({
-    summary: '학부를 삭제합니다',
+    summary: '학부를 삭제합니다. Manager 권한이 요구됩니다',
   })
   @ApiOkResponse({ type: CommonResponseDto })
   @ApiBearerAuth()

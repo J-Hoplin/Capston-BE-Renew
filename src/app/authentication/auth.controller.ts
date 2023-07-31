@@ -57,7 +57,9 @@ export class AuthController {
   }
 
   @Post('/refresh')
-  @ApiOperation({ summary: 'Refresh Token을 발급받습니다' })
+  @ApiOperation({
+    summary: 'Refresh Token을 발급받습니다. Refresh Token이 요구됩니다.',
+  })
   @ApiOkResponse({ type: RefreshRequestDto })
   @ApiBadRequestResponse({
     description: MEMBER_EXCEPTION_MSG.MemberNotFound,
