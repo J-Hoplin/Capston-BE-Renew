@@ -32,6 +32,8 @@ Cloud Education Backend Member Management API
 ### Development Environment
 
 ```
+yarn install // or `npm install`
+
 cd dev-docer
 
 docker-compose up -d
