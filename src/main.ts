@@ -8,6 +8,8 @@ import { initializeTransactionalContext } from 'typeorm-transactional-cls-hooked
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Enable CORS
+  app.enableCors();
   // Global flow interceptor
   app.useGlobalInterceptors(new FlowInterceptor());
 
