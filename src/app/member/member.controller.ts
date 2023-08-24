@@ -116,7 +116,8 @@ export class MemberController {
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '회원가입을 진행합니다.',
-    description: '비밀번호는 Bcrypt를 사용해 단방향 암호화합니다',
+    description:
+      '비밀번호는 Bcrypt를 사용해 단방향 암호화합니다. Datetime Format은 `YYYY-MM-DD`로 통일해주시기 바랍니다.',
   })
   @ApiOkResponse({ type: MemberEntity })
   @ApiUnprocessableEntityResponse({
