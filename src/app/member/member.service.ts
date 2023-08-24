@@ -11,6 +11,7 @@ import {
   InvalidMemberApproval,
   EmailYetConfirmed,
   DepartmentIdNotGiven,
+  UnsupportedCheckType,
 } from '@infrastructure/exceptions';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { ConfigType } from '@nestjs/config';
@@ -25,6 +26,7 @@ import { UpdateMemberApprovalDto } from './dto/updateMemberApproval.dto';
 import * as fs from 'fs';
 import { Logger, LoggerModule } from '@hoplin/nestjs-logger';
 import * as bcrypt from 'bcryptjs';
+import { CheckType } from './member.enum';
 
 @Injectable()
 export class MemberService {
@@ -104,9 +106,13 @@ export class MemberService {
     profileImage?: Express.Multer.File,
   ): Promise<MemberEntity> {
     // Check group id exist
-    await this.checkGidTaken(body.groupId);
+    if (!(await this.checkValueIsAvailable(CheckType.GID, body.groupId))) {
+      throw new GroupIDAlreadyTaken();
+    }
     // Check email taken
-    await this.checkEmailTaken(body.email);
+    if (!(await this.checkValueIsAvailable(CheckType.EMAIL, body.email))) {
+      throw new EmailAlreadyTaken();
+    }
     // encrypt password
     body.password = await this.hashPassword(body.password);
     // Create new member with transaction
@@ -217,24 +223,26 @@ export class MemberService {
     return updatedMember;
   }
 
-  public async checkEmailTaken(email: string) {
-    const findMember = await this.memberRepository.findOneBy({
-      email,
-    });
-    if (findMember) {
-      throw new EmailAlreadyTaken();
+  public async checkValueIsAvailable(
+    tp: CheckType,
+    val: string,
+  ): Promise<boolean> {
+    let findMember: MemberEntity;
+    switch (tp) {
+      case 'email':
+        findMember = await this.memberRepository.findOneBy({
+          email: val,
+        });
+        break;
+      case 'gid':
+        findMember = await this.memberRepository.findOneBy({
+          groupId: val,
+        });
+        break;
+      default:
+        throw new UnsupportedCheckType();
     }
-    return true;
-  }
-
-  public async checkGidTaken(gid: string) {
-    const findMember = await this.memberRepository.findOneBy({
-      groupId: gid,
-    });
-    if (findMember) {
-      throw new GroupIDAlreadyTaken();
-    }
-    return true;
+    return !findMember ? true : false;
   }
 
   public async getMemberApproval(id: number): Promise<member.Approve> {

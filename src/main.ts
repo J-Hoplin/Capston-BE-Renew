@@ -4,6 +4,7 @@ import swaggerGenerator from '@infrastructure/swagger/swagger.config';
 import { SwaggerModule } from '@nestjs/swagger';
 import { FlowInterceptor } from '@hoplin/nestjs-logger';
 import { initializeTransactionalContext } from 'typeorm-transactional-cls-hooked';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,8 @@ async function bootstrap() {
   app.setGlobalPrefix('v1');
 
   app.enableShutdownHooks();
+
+  app.useGlobalPipes(new ValidationPipe());
 
   // Add Swagger Document
   SwaggerModule.setup('docs', app, swaggerGenerator(app));

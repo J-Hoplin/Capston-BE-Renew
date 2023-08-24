@@ -50,6 +50,7 @@ import { Member } from '../authentication/Member.decorator';
 import { AllowedMember } from '../authorization/allowed.guard';
 import { Roles } from '../authorization/role.decorator';
 import { member } from '@src/infrastructure/types';
+import { CheckType, CheckTypeValidationPipe } from './member.enum';
 
 @ApiTags('Member')
 @Controller('member')
@@ -115,7 +116,8 @@ export class MemberController {
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '회원가입을 진행합니다.',
-    description: '비밀번호는 Bcrypt를 사용해 단방향 암호화합니다',
+    description:
+      '비밀번호는 Bcrypt를 사용해 단방향 암호화합니다. Datetime Format은 `YYYY-MM-DD`로 통일해주시기 바랍니다.',
   })
   @ApiOkResponse({ type: MemberEntity })
   @ApiUnprocessableEntityResponse({
@@ -186,28 +188,21 @@ export class MemberController {
     return await this.memberService.updateMember(body, member, file);
   }
 
-  @Get('/email/:email')
-  @ApiOperation({ summary: 'Email 중복체크를 진행합니다' })
+  @Get('/check/:type/:value')
+  @ApiOperation({
+    summary: '회원 정보값의 중복값이 있는지 확인합니다',
+    description: "type의 값은 'email' 혹은 'gid'가 되어야 합니다.",
+  })
   @ApiOkResponse({ type: CommonResponseDto })
   @ApiBadRequestResponse({
-    description: MEMBER_EXCEPTION_MSG.EmailAlreadyTaken,
+    description: MEMBER_EXCEPTION_MSG.UnsupportedCheckType,
   })
-  public async checkEmailTaken(@Param('email') email: string) {
+  public async checkValueIsAvailable(
+    @Param('type', CheckTypeValidationPipe) tp: CheckType,
+    @Param('value') val: string,
+  ) {
     const result = new CommonResponseDto(
-      await this.memberService.checkEmailTaken(email),
-    );
-    return result;
-  }
-
-  @Get('/gid/:gid')
-  @ApiOperation({ summary: 'Group ID 중복체크를 진행합니다' })
-  @ApiOkResponse({ type: CommonResponseDto })
-  @ApiBadRequestResponse({
-    description: MEMBER_EXCEPTION_MSG.GroupIDAlreadyTaken,
-  })
-  public async checkGidTaken(@Param('gid') gid: string) {
-    const result = new CommonResponseDto(
-      await this.memberService.checkGidTaken(gid),
+      await this.memberService.checkValueIsAvailable(tp, val),
     );
     return result;
   }

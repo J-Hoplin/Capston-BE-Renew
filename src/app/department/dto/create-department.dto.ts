@@ -10,13 +10,13 @@ export class CreateDepartmentDto implements Partial<DepartmentEntity> {
   name!: string;
 
   @ApiProperty({ required: false })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   phoneNumber?: string;
 
   @ApiProperty({ required: false })
-  @IsOptional()
   @IsUrl()
+  @IsOptional()
   url?: string;
 
   @ApiProperty({
