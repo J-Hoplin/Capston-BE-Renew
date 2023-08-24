@@ -15,8 +15,8 @@ export class UpdateMemberDto implements Partial<MemberEntity> {
   id!: number; // Will be deleted after auth API generated
 
   @ApiProperty({ required: false })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   name?: string;
 
   @ApiProperty({ required: false })
