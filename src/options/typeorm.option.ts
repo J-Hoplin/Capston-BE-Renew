@@ -12,7 +12,7 @@ export const typeORMConfig: TypeOrmModuleAsyncOptions = {
       password: configService.get<string>('DATABASE_PASSWORD'),
       entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
       database: configService.get<string>('DATABASE_DEFAULT'),
-      synchronize: configService.get<string>('API_MODE') === 'dev',
+      synchronize: false,
     };
   },
   inject: [ConfigService],
