@@ -223,7 +223,10 @@ export class MemberService {
     return updatedMember;
   }
 
-  public async checkValueIsAvailable(tp: CheckType, val: string) {
+  public async checkValueIsAvailable(
+    tp: CheckType,
+    val: string,
+  ): Promise<boolean> {
     let findMember: MemberEntity;
     switch (tp) {
       case 'email':
@@ -239,7 +242,7 @@ export class MemberService {
       default:
         throw new UnsupportedCheckType();
     }
-    return findMember ? true : false;
+    return !findMember ? true : false;
   }
 
   public async getMemberApproval(id: number): Promise<member.Approve> {

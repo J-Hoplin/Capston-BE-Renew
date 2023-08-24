@@ -11,6 +11,7 @@ import {
 } from './test';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
+import { CheckType } from './member.enum';
 
 describe('MemberController', () => {
   let controller: MemberController;
@@ -103,14 +104,14 @@ describe('MemberController', () => {
     const email = 'jhoplin7259@gmail.com';
 
     it('Should check email already taken', async () => {
-      const spy = jest.spyOn(service, 'checkEmailTaken');
-      await controller.checkEmailTaken(email);
+      const spy = jest.spyOn(service, 'checkValueIsAvailable');
+      await controller.checkValueIsAvailable(CheckType.EMAIL, email);
       expect(spy).toBeCalledTimes(1);
     });
 
     it('Should check gid already taken', async () => {
-      const spy = jest.spyOn(service, 'checkGidTaken');
-      await controller.checkGidTaken(gid);
+      const spy = jest.spyOn(service, 'checkValueIsAvailable');
+      await controller.checkValueIsAvailable(CheckType.GID, gid);
       expect(spy).toBeCalledTimes(1);
     });
   });

@@ -162,7 +162,7 @@ describe('MemberService', () => {
         CheckType.EMAIL,
         email,
       );
-      expect(result).toBeInstanceOf(false);
+      expect(result).toBe(false);
     });
 
     it('Group ID should not be taken', async () => {
@@ -170,7 +170,7 @@ describe('MemberService', () => {
       const gid = mockCreateMemberDtoStudent(1).groupId;
       // When
       const result = await service.checkValueIsAvailable(CheckType.GID, gid);
-      expect(result).toBeInstanceOf(false);
+      expect(result).toBe(false);
     });
 
     it('Unable to generate member reason of existing group id', async () => {
