@@ -9,18 +9,18 @@ export class UpdateDepartmentDto implements Partial<DepartmentEntity> {
   id!: number;
 
   @ApiProperty({ required: false })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   name?: string;
 
   @ApiProperty({ required: false })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   phoneNumber?: string;
 
   @ApiProperty({ required: false })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   url?: string;
 
   @ApiProperty({

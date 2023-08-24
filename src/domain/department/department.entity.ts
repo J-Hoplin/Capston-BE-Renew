@@ -27,24 +27,24 @@ export class DepartmentEntity extends CommonEntity {
     type: String,
     nullable: true,
   })
-  @IsOptional()
   @ApiProperty()
+  @IsOptional()
   phoneNumber: string;
 
   @Column({
     type: String,
     nullable: true,
   })
-  @IsOptional()
   @ApiProperty()
+  @IsOptional()
   url: string;
 
   @Column({
     type: String,
     nullable: true,
   })
-  @IsOptional()
   @ApiProperty()
+  @IsOptional()
   departmentProfileURL: string;
 
   @CreateDateColumn()
