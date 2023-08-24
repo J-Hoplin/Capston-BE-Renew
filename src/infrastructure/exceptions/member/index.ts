@@ -5,7 +5,14 @@ export const MEMBER_EXCEPTION_MSG = {
   GroupIDAlreadyTaken: 'GROUP_ID_ALREADY_TAKEN',
   EmailAlreadyTaken: 'EMAIL_ALREADY_TAKEN',
   DepartmentIdNotGiven: 'DEPARTMENT_ID_NOT_GIVEN',
+  UnsupportedCheckType: `UNSUPPORTED_CHECK_TYPE`,
 };
+
+export class UnsupportedCheckType extends BadRequestException {
+  constructor() {
+    super(MEMBER_EXCEPTION_MSG.UnsupportedCheckType);
+  }
+}
 
 export class MemberNotFound extends BadRequestException {
   constructor() {
