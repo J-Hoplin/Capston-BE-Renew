@@ -24,6 +24,7 @@ import { mockDepartment1 } from '../department/test';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { UpdateMemberApprovalDto } from './dto/updateMemberApproval.dto';
 import { DeleteMemberDto } from './dto/delete-member.dto';
+import { CheckType } from './member.enum';
 
 describe('MemberService', () => {
   jest.setTimeout(300000);
@@ -111,7 +112,10 @@ describe('MemberService', () => {
       // Given
       const email = mockCreateMemberDtoStudent(1).email;
       // When
-      const result = await service.checkEmailTaken(email);
+      const result = await service.checkValueIsAvailable(
+        CheckType.EMAIL,
+        email,
+      );
       // Then
       expect(result).toBe(true);
     });
@@ -120,7 +124,7 @@ describe('MemberService', () => {
       // Given
       const gid = mockCreateMemberDtoStudent(1).groupId;
       // When
-      const result = await service.checkGidTaken(gid);
+      const result = await service.checkValueIsAvailable(CheckType.GID, gid);
       // Then
       expect(result).toBe(true);
     });
@@ -153,25 +157,20 @@ describe('MemberService', () => {
     it('Email should not be taken', async () => {
       // Given
       const email = mockCreateMemberDtoStudent(1).email;
-      try {
-        // When
-        const result = await service.checkEmailTaken(email);
-      } catch (err) {
-        // Then
-        expect(err).toBeInstanceOf(EmailAlreadyTaken);
-      }
+      // When
+      const result = await service.checkValueIsAvailable(
+        CheckType.EMAIL,
+        email,
+      );
+      expect(result).toBe(false);
     });
 
     it('Group ID should not be taken', async () => {
       // Given
       const gid = mockCreateMemberDtoStudent(1).groupId;
-      try {
-        // When
-        const result = await service.checkGidTaken(gid);
-      } catch (err) {
-        // Then
-        expect(err).toBeInstanceOf(GroupIDAlreadyTaken);
-      }
+      // When
+      const result = await service.checkValueIsAvailable(CheckType.GID, gid);
+      expect(result).toBe(false);
     });
 
     it('Unable to generate member reason of existing group id', async () => {

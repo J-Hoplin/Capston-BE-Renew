@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { MemberEntity } from '@src/domain/member/member.entity';
 import { member } from '@src/infrastructure/types';
 import {
-  IsDate,
+  IsDateString,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -41,7 +41,7 @@ export class CreateMemberDto implements Partial<MemberEntity> {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsDate()
+  @IsDateString()
   birth!: Date;
 
   @ApiProperty({
@@ -56,7 +56,6 @@ export class CreateMemberDto implements Partial<MemberEntity> {
     description: '학생 혹은 교직원 가입의 경우에는 필수입니다.',
   })
   @IsOptional()
-  @IsNumber()
   departmentId: number;
 
   @ApiProperty({

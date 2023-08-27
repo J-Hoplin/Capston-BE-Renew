@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MemberEntity } from '@src/domain/member/member.entity';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateMemberDto implements Partial<MemberEntity> {
   @ApiProperty()
@@ -9,13 +15,13 @@ export class UpdateMemberDto implements Partial<MemberEntity> {
   id!: number; // Will be deleted after auth API generated
 
   @ApiProperty({ required: false })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   name?: string;
 
   @ApiProperty({ required: false })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   changedpassword?: string;
 
   @ApiProperty()
@@ -24,8 +30,8 @@ export class UpdateMemberDto implements Partial<MemberEntity> {
   originalpassword!: string;
 
   @ApiProperty({ required: false })
+  @IsDateString()
   @IsOptional()
-  @IsString()
   birth?: Date;
 
   @ApiProperty({
